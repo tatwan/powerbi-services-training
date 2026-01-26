@@ -1,3 +1,5 @@
+
+
 # PowerBI Service (Day 1)
 
 ## Learning Objectives
@@ -61,6 +63,7 @@ Power BI is the **visualization and reporting layer** of Fabric. While Power BI 
 Navigate to [app.powerbi.com](https://app.powerbi.com) and sign in with your organizational account.
 
 ### Main Navigation (Left Pane)
+
 
 | Element | Description |
 |---------|-------------|
@@ -153,21 +156,29 @@ Now, you will be inside the main Power BI Report Canvas/Designer view
 
 ![image-20260125180202757](images/image-20260125180202757.png)
 
-Create you report 
+Create your report 
 
 ![image-20260125184920159](images/image-20260125184920159.png)
 
 * **Total Sales By Area**
   * Stacked Column Chart 
+  
   * X-axis: `Area` , Y-axis: `SALES PRICE` default using Sum
+  
   * You can change line color from **Visualizations** panel, **Visual** tab, scroll to **Columns**, then **Color**.
+  
   * You can rename the chart from **Visualizations** panel, **Format visual** tab, then **General** tab, then  **Title**.
+  
+    <img src="images/image-20260126100908416.png" alt="image-20260126100908416" style="zoom:50%;" />
+  
 * **Top 10 Building Class Category by Sales**
+  
   * Stacked Bar Chart
   * Y-axis: `BUILDING CLASS CATEGORY`, X-axis: `SALES PRICE` default using Sum
   * In **Filters** panel, add `BUILDING CLASS CATEGORY` to **Filters on this visual** section. Select **Top N** as filter type, In show items select **Top** and enter `10` for top 10. Drag, `SALES PRICE` to the __By value__ option. 
   * You can change line color from **Visualizations** panel, **Visual** tab, scroll to **Bar**, then **Color**.
   * You can rename the chart from **Visualizations** panel, **Format visual** tab, then **General** tab, then  **Title**.
+  
 * **Sales by Month By Year**
   * Line Chart
   * X-axis: `SALE DATE`. Keep only Month. Y-axis: `SALES PRICE` default using Sum
@@ -205,7 +216,10 @@ From __My workspace__ click __+ New item__. In the panel that appears, scroll do
 
 ![image-20260125193305319](images/image-20260125193305319.png)
 
-This will take you to the report screen similar to that in the first section of this course. Click the __CSV__ option and load the `sales2017_raw.csv` data. 
+This will take you to the report screen similar to that in the first section of this course. Click the __CSV__ option and load the `sales2017_raw.csv` data.
+
+> [!note]
+> Make sure you have all the required CSV files in your datasets folder before proceeding. 
 
 ![image-20260125193437316](images/image-20260125193437316.png)
 
@@ -215,11 +229,11 @@ Then click **Next**, then **Next** again.
 
 > [!note]
 >
-> Every report in Power BI (Service/Fabric) is built on top of a semantic model, and that model must exist before (or as part of) creating the report. 
+> Every report in Power BI Service/Fabric is built on top of a semantic model, and that model must exist before (or as part of) creating the report. 
 
-#### What a semantic model is
+#### What is a Semantic Model?
 
-In Power BI, a **semantic** model is the data model that sits between your raw data sources and your reports. It is the curated layer that the report actually queries.
+In Power BI, a **semantic model** is the data model that sits between your raw data sources and your reports. It is the curated layer that the report actually queries.
 
 Concretely, a semantic model includes:
 
@@ -327,7 +341,7 @@ Let’s do the following transformation to clean and prepare our dataset:
 
 8. In the data view, scroll to the last two columns `delivery_date_format1` and `delivery_date_format2`. The first uses a standard USA date format (month/day/year) while the second uses a non standard date format (for USA). If you attempt to change the format on the second one to date, some dates will error out. In order to achieve this successfully you will need to change the __locale__
 
-   1. For the `delivery_date_format2` column, click on the top left corner of that column (the ABC icon), then select __Using locale…__. A window may pop, select __Add new step__.  Then, select `Date` as __Data type__, and `Englis (United Kingdom)` for __Locale__, then click __OK__
+   1. For the `delivery_date_format2` column, click on the top left corner of that column (the ABC icon), then select __Using locale…__. A window may pop up, select __Add new step__.  Then, select `Date` as __Data type__, and `English (United Kingdom)` for __Locale__, then click __OK__
 
       <img src="images/image-20260125203146554.png" alt="image-20260125203146554" style="zoom:50%;" />
 
@@ -337,7 +351,7 @@ Let’s do the following transformation to clean and prepare our dataset:
 
        
 
-   3. Do the same for `delivery_date_format1`, select __Using locale__, then choose  __Add new step__, `Date` as the Data type, select `English (United State)` as locale, and make sure you have 100% valid records after the transformation. 
+   3. Do the same for `delivery_date_format1`, select __Using locale__, then choose  __Add new step__, `Date` as the Data type, select `English (United States)` as locale, and make sure you have 100% valid records after the transformation. 
 
 9. Power Query has an option to Auto detect data types. Let’s see if this can help us to detect/update the remaining columns. 
 
@@ -366,6 +380,27 @@ And a similar list of steps
 
 <img src="images/image-20260125210054541.png" alt="image-20260125210054541" style="zoom:50%;" />
 
+### Understanding Data Types in Power BI
+
+Data types are critical in Power BI because they determine:
+- **What operations are available**: You can't sum text values
+- **How values are displayed**: Currency vs decimal formatting
+- **Storage efficiency**: Whole numbers take less space than text
+- **Aggregation behavior**: Dates enable time intelligence functions
+
+| Data Type | Icon | Use Case | Example |
+|-----------|------|----------|---------|
+| **Text** | ABC | Names, descriptions, IDs that won't be calculated | "Product A", "CA" |
+| **Whole Number** | 123 | Counts, quantities without decimals | Sales count: 150 |
+| **Decimal Number** | 1.2 | Precise measurements | Weight: 15.75 kg |
+| **Currency** | $ | Money values (4 decimal precision) | Revenue: $1,234.56 |
+| **Date** | 📅 | Dates only (no time) | 2024-01-15 |
+| **Date/Time** | 📅🕐 | Dates with timestamps | 2024-01-15 14:30:00 |
+| **True/False** | T/F | Binary flags | Is Active: True |
+
+> [!tip]
+> **Common Mistake**: Loading numeric IDs (like product_id, order_id) as numbers. If you won't perform calculations on them, keep them as Text to prevent misuse in aggregations.
+
 ----
 
 ## Add another Data Source (Store Cities)
@@ -391,9 +426,9 @@ And a similar list of steps
    3. Rename the column rom `store_size` to `store size`.  One way to accomplish this is by double clicking the column name.
    4. Change the data type from `Text` to `Whole Number`
 
-5. You will need split state, state abbreviation, and city in the `state - state abr - city` column.
+5. You will need to split state, state abbreviation, and city in the `state - state abr - city` column.
 
-   1. Select the `state - state abr - city` column. From he __Home__ menu select __Split column__, select __By delimiter__
+   1. Select the `state - state abr - city` column. From the __Home__ menu select __Split column__, select __By delimiter__
 
    2. In the __Separator__ drop down, select `--Custom--`, and type a hyphen `-`
 
@@ -408,7 +443,7 @@ And a similar list of steps
    1. Similar to step 5, select __Split column__, select `--Custom--` separator, then type ` /` (space then `/`). Click OK.
    2. Rename the columns to `lat` and `long`
 
-7. To to __Transform__ menu, and try the __Detect data type__ for the remaining columns. 
+7. Go to the __Transform__ menu, and try the __Detect data type__ for the remaining columns. 
 
 8. When we did split columns, some values had leading white spaces that are hard to see. 
 
@@ -524,6 +559,231 @@ Try and find the answers the following questions:
 > 1. \$2,054.77
 > 2. \$1137
 > 3. \$14.4278
+
+# Part 3: Data Modeling 
+
+## Appending Data 
+
+Head to __My workspace__, find and click on the `Sales Data` semantic model. From the main screen, click __Open semantic model__. From the top right corner, switch from `Viewing` to `Editing`
+
+<img src="images/image-20260126101718753.png" alt="image-20260126101718753" style="zoom:50%;" />
+
+Then click __Transform data__, and this should take you back to Power Query.
+
+1. Click the __Get data__ option and select Text/CSV. Load both `sales2018.csv` and `sales_2019.csv` datasets (one at a time)
+
+2. For the two datasets, make the first row as header.
+
+3. Both `sales2018` and `sales2019`, have similar columns to  `sales 2017` and can be stacked into one (one on top of the other). Stacking (or appending as called in Power BI) allows us to treat the multiple datasets as one.
+
+   1. From the __Home__ menu, click __Combine__, then click __Append queries__ which gives us two options (Append queries and Append queries as new)
+
+      <img src="images/image-20260126102805076.png" alt="image-20260126102805076" style="zoom:50%;" />
+
+      > [!tip]
+      >
+      > **Append Queries** in Power BI combines rows from two or more tables with similar structures into an existing table, while **Append Queries as New** creates a distinct, separate table for the combined data. Append Queries (inline) saves memory by reducing table count, whereas Append Queries as New preserves original tables for separate use. 
+
+   2. Click __Append queries as new__, and select `sales2018` as the first table, and `sales2019` as the second table. Then click OK.
+
+      <img src="images/image-20260126103125428.png" alt="image-20260126103125428" style="zoom:50%;" />
+
+   3. You may see a message on data privacy, just click __Continue__ 
+
+      
+
+      ![image-20260126103250135](images/image-20260126103250135.png)
+
+      On the next screen make sure  __Ignore Privacy Levels checks for this document__ is __unchecked__. In the two drop downs below, select __Organizational__, then click __Save__
+
+      ![image-20260126111510190](images/image-20260126111510190.png)
+
+      > [!warning]
+      >
+      > If you did not see or get the above Privacy levels , you may get it in the next steps. 
+
+   4. Double click the newly created data set labelled  `Append` and rename it to `sales`.
+
+4. Click on the first column `order_id` of the new `sales` dataset, then hit _Shift key_, and click the `delivery_date_format1` column (the one before the last). This allows you to multi select all columns except the last one. Then from the __Transform__ menu, click __Detect data type__ to allow Power Query to help us auto detect the types. 
+
+   1. The `price` column was not properly converted due to the `NA` values. WE can filter this out, by unselecting `NA` values as we did in an earlier step for `sales 2017`. Then click __Detect data type__ again and it should be converted properly. 
+   2. You can update `delivery_date_format2` using __locale__ option like we did in the `sales 2017` dataset. 
+
+5. Now, let’s combine `sales` dataset with `sales 2017` dataset. 
+
+   1. Select the `sales` dataset which already combines `sales2018` and `sales2019`.
+
+   2. Click __Combine__, then from __Append queries__ select __Append queries__
+
+   3. Select `sales 2017` as the Table to append. Then click OK.
+
+      <img src="images/image-20260126104517611.png" alt="image-20260126104517611" style="zoom:50%;" />
+
+   4. Let’s now organize and group/manage our queries better. We don’t need `sales 2017`, `sales2018`, and `sales2019` any more since they are all now combined into the `sales` dataset. 
+
+      1. In the Queries panel, right click anywhere and select __New group__ option. 
+
+         <img src="images/image-20260126104713405.png" alt="image-20260126104713405" style="zoom:50%;" />
+
+      2. Name the group __Helper tables__
+
+      3. You can drag and drop the three tables we don’t need into the **Helper tables** group. Alternatively, you can right click and select __Move to group__, then select __Helper tables__
+
+         <img src="images/image-20260126104843574.png" alt="image-20260126104843574" style="zoom:50%;" />
+
+      4. Click __Save__. This should close the __Power Query__ window. 
+
+6. This will take you back to the Semantic Model view. To make the view cleaner to the user, so they do not have to see all the tables when creating reports, you can make them hidden from view. Also, update the model to reflect what you see below:
+
+   
+
+   ![image-20260126112113210](images/image-20260126112113210.png)
+
+   Notice from the screen shot three tables are hidden (`sales 2017`, `sales2018`, `sales2019`), and three are visible. I updated the relationship to be using the new `sales` table which combines all three years. 
+
+----
+
+# Part 4: Visualizations and Drilling
+
+From __My workspace__, click on the __Sales Data__ semantic model. From the Semantic model main page, click __Explore__ then __Create a blank report__. 
+
+1. **Sum of revenue by Category** 
+
+   1. Stacked column bar
+      1. X-axis: `category` 
+      2. Y-axis: `Sum of Revenue `
+      3. Format Visual
+         1. Data labels turned on
+            1. Background turned on
+         2. For both X-axis and Y-axis turn off the Title option 
+
+2. **Sum of revenue by Year**
+
+   1. Line chart
+      1. X-axis: `order_date` which is a date hierarchy consisting of year, quarter, month, and day
+      2. Y-axis: `Sum of Revenue`
+
+
+   ![image-20260126113500177](images/image-20260126113500177.png)
+
+   Notice the icon highlighted, if you click this it would drill down from Year to Quarter, if you click again it would further drill down to Month, and again to Date. This allows you to drill within the Date hierarchy (drilling down, and drilling up)
+
+   Keep it at Year, Quarter, and Month level as shown:
+
+   ![image-20260126113601059](images/image-20260126113601059.png)
+
+3. You can create similar drill hierarchy to the __Sum of revenue by category__ chart:
+
+   1. Drag `sub_category` and place it inside the X-axis right underneath  `category` as shown:
+
+      <img src="images/image-20260126113922850.png" alt="image-20260126113922850" style="zoom:50%;" />
+
+      Notice the chart will be updated to reflect an ability to drill up and down the hierarchy 
+
+      ![image-20260126114007707](images/image-20260126114007707.png)
+
+   2. You can click on a bar and then right-click, select drill down. For example, Select `Beverages`, right click, select Drill down. You should see the following:
+
+      ![image-20260126114104184](images/image-20260126114104184.png)
+
+4. Let’s modify the line chart to include `Sum of sales` on the __Secondary y-axis__
+
+   1. Drag `sales` to the __Secondary y-axis__
+
+      ![image-20260126114531325](images/image-20260126114531325.png)
+
+   2. In the **Format Visual** panel, from the __Visual__ tab, scroll down and you will see __Zoom slider__ option. Turn that on. 
+
+   <img src="images/image-20260126114730714.png" alt="image-20260126114730714" style="zoom:50%;" />
+
+   This will create two sliders: one for the y-axis and another for the x-axis. Turn the Y-axis off and just keep the X-axis turned on. Lastly click __Save__ to save the visualization as `Sales Data Analysis Part 2`
+
+   ![image-20260126115014149](images/image-20260126115014149.png)
+
+   
+
+
+----
+
+## Extra:Filters and Slicers
+
+Filters and slicers allow users to interactively narrow down data displayed in your reports.
+
+### Understanding Filter Levels
+
+Power BI offers different levels of filtering:
+
+| Filter Level | Scope | Use Case |
+|--------------|-------|----------|
+| **Visual-level** | Affects a single visual | Top 10 products in a chart |
+| **Page-level** | Affects all visuals on current page | Show only 2024 data on this page |
+| **Report-level** | Affects all pages in the report | Exclude test data from entire report |
+
+### Filters Panel
+
+The **Filters pane** (right side of the screen) shows three sections:
+1. **Filters on this visual**: Applies to selected visual only
+2. **Filters on this page**: Applies to all visuals on current page
+3. **Filters on all pages**: Applies to entire report
+
+### Slicers: Interactive Filters
+
+**Slicers** are visual filters that appear on the report canvas itself, allowing end-users to filter data interactively.
+
+#### Creating a Slicer
+
+1. From the **Visualizations** pane, click the **Slicer** icon
+2. Add a field to the **Field** well (e.g., `category`, `state`, or `order_date`)
+3. Position and resize the slicer on your canvas
+
+#### Slicer Types
+
+You can change how a slicer works by selecting the slicer and choosing from:
+- **List** (default): Vertical list with checkboxes
+- **Dropdown**: Save space with a dropdown menu
+- **Between**: For numeric/date ranges (select "Between" from slicer settings)
+- **Before/After**: Filter dates before or after a specific date
+- **Tile**: Visual buttons for categories
+
+> [!tip]
+> **Best Practice**: Place slicers at the top or left side of your report for easy user access. Use dropdowns for fields with many values to save canvas space.
+
+### Hands-On Exercise: Adding Slicers
+
+Let's add interactive filters to our **Sales Data Analysis** report:
+
+1. **Add a Category Slicer**
+   1. Click on an empty area of the canvas
+   2. Select **Slicer** from Visualizations pane
+   3. Drag `category` from the `products` table to the **Field** well
+   4. Position it at the top-left of your report
+   5. Resize to show all categories
+
+2. **Add a Year Slicer**
+   1. Add another slicer
+   2. Drag `order_date` hierarchy to the Field well
+   3. Expand the hierarchy and remove all except **Year**
+   4. From the slicer dropdown menu (three dots), select **Dropdown** style
+   5. Position next to the category slicer
+
+3. **Test the Slicers**
+   - Select "Beverages" from the category slicer → all visuals update
+   - Select "2018" from the year dropdown → notice the data filtered across all charts
+   - Click **Clear selections** (eraser icon) to reset
+
+### Cross-Filtering vs Cross-Highlighting
+
+When you click on a bar in a bar chart:
+- **Cross-highlighting** (default): Other visuals dim unrelated data but keep it visible
+- **Cross-filtering**: Other visuals completely hide unrelated data
+
+To change this behavior:
+1. **File** → **Options and settings** → **Options**
+2. Navigate to **Report settings**
+3. Toggle **Change default visual interaction from cross highlighting to cross filtering**
+
+> [!note]
+> You can also control interaction behavior for individual visuals using **Format** → **Edit interactions** in the ribbon.
 
 ----
 
