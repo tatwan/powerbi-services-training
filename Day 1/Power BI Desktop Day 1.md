@@ -1,5 +1,9 @@
 # PowerBI Desktop (Day 1)
 
+
+
+[toc]
+
 ## Learning Objectives
 
 By the end of Day 1, you will be able to:
@@ -230,8 +234,13 @@ Now we'll work with messy, real-world data and use **Power Query** to clean it.
 ### Import sales2017_raw.csv
 
 1. **Home** → **Get Data** → **Text/CSV**
+
 2. Select `sales2017_raw.csv`
+
 3. In the preview window, click **Transform Data** (NOT Load)
+
+   <img src="images/image-20260127130936140.png" alt="image-20260127130936140" style="zoom:50%;" />
+
    - This opens **Power Query Editor**
 
 > [!important]
@@ -242,16 +251,15 @@ Now we'll work with messy, real-world data and use **Power Query** to clean it.
 
 When Power Query opens, you'll see:
 
-**Left Pane**: Queries (list of tables you're working with) **Center**: Data preview with column headers **Right Pane**:
+**Left Pane**: Queries (list of tables you're working with) 
+
+**Center**: Data preview with column headers
+
+ **Right Pane**:
 
 - **Query Settings**: Name of current query and Applied Steps
 - **Properties**: Query-level settings
-
-**Bottom Options**:
-
-- **Diagram View**: Visual representation of query relationships
-- **Data View**: The preview table (current view)
-- **Schema View**: Column names and types only
+- __Applied Steps__:  These are a recorded, sequential list of all data transformations applied to a data source
 
 **Ribbon Tabs**:
 
@@ -288,19 +296,28 @@ Let's transform this messy data step by step.
 ### A. Enable Data Profiling
 
 1. In Power Query, go to **View** tab
+
+   ![image-20260127131255183](images/image-20260127131255183.png)
+
 2. Check:
    - ☑️ **Column quality** (shows valid/error/empty percentages)
    - ☑️ **Column distribution** (shows value frequency)
-   - ☑️ **Column profile** (shows detailed stats)
+   - ☑️ **Show whitespace** 
+
 3. At bottom, change "Column profiling based on" from **Top 1000 rows** → **Entire dataset**
+
+   ![image-20260127131807015](images/image-20260127131807015.png)
 
 This helps you spot data quality issues at a glance.
 
 ### B. Remove Empty Rows
 
-1. Look at the data - you'll see rows with all blank values
-2. **Home** tab → **Remove Rows** → **Remove Blank Rows**
-3. Notice a new step appears in Applied Steps: "Removed Blank Rows"
+First step we need to skip the first two rows:
+
+1. __Home__ tab → __Remove Rows__ → __Remove Top Rows__ → Number of Rows = 2
+2. Look at the data - you'll see rows with all blank values
+   1. **Home** tab → **Remove Rows** → **Remove Blank Rows**
+   2. Notice a new step appears in Applied Steps: "Removed Blank Rows"
 
 ### C. Promote First Row to Headers
 
@@ -310,7 +327,19 @@ The first row contains column names, not data:
 2. Column names update
 3. A step "Promoted Headers" is created
 
-### D. Change Data Types
+### D. Remove NAs from product_id
+
+1. filter the column to remove rows that are `NA` or `(blank)` by unchecking them. Then click **Ok**.
+
+<img src="images/image-20260127132046581.png" alt="image-20260127132046581" style="zoom:50%;" />
+
+### E. Remove unnecessary columns 
+
+Looking at column3 profile it show 99% being empty. We can safely remove this columns using:
+
+Click on __column3__, then **Home** tab → **Remove Columns** dropdown
+
+### F. Change Data Types
 
 Power BI auto-detects types, but let's verify:
 
@@ -322,85 +351,181 @@ Power BI auto-detects types, but let's verify:
 2. To change a data type:
    - Click the icon next to the column name
    - OR: Right-click column → **Change Type**
-   - OR: **Home** tab → **Data Type** dropdown
+   - OR: **Transform** tab → **Data Type** dropdown
 
 **For our sales data, ensure:**
 
-- `order_date` → **Date**
-- `ship_date` → **Date**
+- `order_date`  and `order_date2`→ **Date**
+
+  <img src="images/image-20260127132444058.png" alt="image-20260127132444058" style="zoom:50%;" />
+
+- `delivery_date_format1` → **Date**
+
 - `revenue` → **Decimal Number** or **Fixed Decimal Number**
-- `quantity` → **Whole Number**
-- `store_id`, `product_id` → **Text** (even if numeric - these are IDs, not measures)
+
+- `stock` → **Whole Number**
+
+- `order_id` → **Text** (even if numeric - these are IDs, not measures)
 
 > [!tip] 
 >
-> **Why keep IDs as Text?** Product IDs like "001" and "1" are different. As text, they're preserved. As numbers, they'd both become 1.
+> **Why keep IDs as Text?** Order IDs like "001" and "1" are different. As text, they're preserved. As numbers, they'd both become 1.
 
-### E. Handle Locale Issues in Revenue Column
+### E. Handle Locale Issues
 
-The `revenue` column may have formatting issues (e.g., commas, currency symbols).
+In the data view, the columns `delivery_date_format1` and `delivery_date_format2` are the same but uses different date formats. The first uses a standard USA date format (month/day/year) while the second uses a non standard date format (for USA). If you attempt to change the format on the ``delivery_date_format2`` to date, some dates will error out. In order to achieve this successfully you will need to change the __locale__
 
-1. Right-click the `revenue` column
-2. **Replace Values**:
-   - Value to Find: `,`
-   - Replace With: (leave blank)
-   - Click **OK**
-3. Ensure data type is **Decimal Number**
+From the `delivery_date_format2` click on __Using Locale…__
 
-If you still see errors:
+<img src="images/image-20260127132815071.png" alt="image-20260127132815071" style="zoom:50%;" />
 
-- Right-click column → **Replace Errors**
-- Enter `0` or `null` (or investigate errors first with **Keep Errors**)
+Then change type of locale and click __OK__
 
-### F. Trim and Clean Text Columns
+<img src="images/image-20260127132854852.png" alt="image-20260127132854852" style="zoom:50%;" />
 
-Text fields may have extra spaces:
+Validate that you have no errors in any of the values
 
-1. Select the `status` column
-2. Hold **Ctrl** and click `category` and `sub_category` to multi-select
-3. **Transform** tab → **Format** → **Trim** (removes leading/trailing spaces)
-4. Also apply **Clean** if needed (removes non-printable characters)
+<img src="images/image-20260127132941532.png" alt="image-20260127132941532" style="zoom:70%;" />
 
-### G. Split the Product ID Column (Example)
+### F. Change Price type 
 
-If your `product_id` looks like "CAT-001", you might want to extract the category prefix:
+If you try to change Price from Text to Fixed decimal you will see few errors. 
 
-1. Right-click `product_id` column
-2. **Split Column** → **By Delimiter**
-3. Select delimiter: `-` (dash)
-4. Choose **At the left-most delimiter**
-5. Click **OK**
-6. Rename new columns: `product_category`, `product_number`
+<img src="images/image-20260127133110677.png" alt="image-20260127133110677" style="zoom:70%;" />
 
-> [!note] This is just an example. Only do this if your data structure requires it.
+This is due to some NA values. Here is how you can clean that up:
 
-### H. Rename the Query
+1. Filter out NA values then click OK
 
-In **Query Settings** pane (right), under **Properties**:
+   <img src="images/image-20260127133209357.png" alt="image-20260127133209357" style="zoom:50%;" />
 
-- Change **Name** from `sales2017_raw` to `sales` (cleaner name)
+2. Change the data type from Text to Fixed decimal. 
+
+   <img src="images/image-20260127133303101.png" alt="image-20260127133303101" style="zoom:50%;" />
+
+   And make sure there are no errors
+
+   <img src="images/image-20260127133316795.png" alt="image-20260127133316795" style="zoom:67%;" />
+
+### G. Promo_bin_1 values 
+
+In `promo_bin_1` let’s replace `verylow` with `very low`
+
+1. Click on `promo_bin_1`
+2. **Home** → **Replace Values** →`verylow` to `very low` then click OK
+
+<img src="images/image-20260127133545099.png" alt="image-20260127133545099" style="zoom:50%;" />
+
+
+
+### H. Clean up sales column
+
+1. Remove the word `sales` using replace 
+   1. **Home** → **Replace Values** →`sales` with nothing (blank)
+   2. Update data type to Decimal number
+
+### I. Remove duplicates
+
+<img src="images/image-20260127153114045.png" alt="image-20260127153114045" style="zoom:50%;" />
 
 ## Step 3: Import Stores and Products Tables
 
-### Import stores.csv
+### Import stores_cities.csv
 
 1. In Power Query Editor: **Home** → **New Source** → **Text/CSV**
-2. Select `stores.csv`
+2. Select `store_cities.csv`
 3. Click **OK** (opens in Power Query)
-4. Clean if needed:
-   - Promote headers if needed
-   - Change data types (ensure `store_id` is **Text**)
-5. Leave the query name as `stores`
 
-### Import products.csv
+### Import producthierarchy.csv
 
 1. **Home** → **New Source** → **Text/CSV**
-2. Select `products.csv`
-3. Clean if needed:
-   - Promote headers
-   - Ensure `product_id` is **Text**
-   - Ensure `price` is **Decimal Number**
-4. Leave query name as `products`
+2. Select `producthierarchy.csv`
+3. Click **OK** (opens in Power Query)
+
+
+
+## Clean  store_cities.csv 
+
+1. Rename the sources by double clicking their names
+
+   1. `store_cities` to `stores`
+
+   2. `sales2017_raw` to `sales2017`
+
+      
+
+   > [!note]
+   >
+   > Later you will connect the two dataset through the `store_id` column present in both.
+
+2. We need to clean the dataset first:
+
+   1. Make the first row as headers. You can do this by selecting : **Home** → __Use first row as headers__
+
+3. For the `store_size` column we need to extract the measures (values). We can do this using __Extract__
+
+   1. Click on `store_size`. 
+   2. From the __Transform__ menu select __Extract__, then __Text Before Delimiter__
+   3. For the __Delimiter__ you can enter a **space** then click OK.
+   4. Rename the column rom `store_size` to `store size`.  One way to accomplish this is by double clicking the column name.
+   5. Change the data type from `Text` to `Whole Number`
+
+4. You will need to split **state**, **state abbreviation**, and **city** in the `state - state abr - city` column.
+
+   1. Select the `state - state abr - city` column. From the __Home__ menu select __Split column__, select __By delimiter__
+   2. In the __Separator__ drop down, select `--Custom--`, and type a hyphen `-` then click OK.
+      1. This should split the column into three columns. If you did not get three columns, click on edit option to edit the step and check that __Each occurrence of the delimiter__ option is selected, and __Number of columns to split into__ it set to 3 under the Advanced options.
+   3. Finally, rename the columns: `state abr`, `state`, and `city`
+
+5. Finally, split the last column `lat/long`
+
+   1. Similar to prior step, select the `lat/long` column, select __Split column__, select `--Custom--` separator, then type ` /` (space then `/` then space). Click OK.
+   2. Rename the columns to `lat` and `long`
+
+6. Go to the __Transform__ menu, and try the __Detect data type__ for the remaining columns. 
+
+   1. When we did split columns, some values had leading white spaces that are hard to see. 
+
+      1. For `state` column, you can right click, go down to select __Transform __, then select  __Trim__
+
+         <img src="images/image-20260127134719998.png" alt="image-20260127134719998" style="zoom:50%;" />
+
+      2. Do the same for the `city` column
+
+## Clean  producthierarchy.csv 
+
+The dataset requires some cleaning and preparation as well. 
+
+Start by renaming the dataset to `products`.
+
+1. Use the first row as header 
+
+2. The `product (brand)` column contains some unwanted characters including special control characters like tab. This can be cleaned using the __clean__ tool.
+
+   1. Select `product (brand)` column, right-click, select __Transform __, then select __Clean__
+   2. Select `product (brand)` column, right-click, select __Transform __, then select  __Capitalize Each Word__
+
+3. The last column `category || sub_category` needs to be split into two columns `category` and `sub_category`
+
+   1. You can split using ` || ` for a clean split (space `||` then space)
+
+4. We can do a split to the `length x depth x width (in cm)` column into three columns: `length`, `depth`, `width`
+
+   1. You can split using ` x ` (space `x` space)
+   2. Convert from CM to Inches (1 cm approximately equals 0.394 inches)
+      1. Select `length` column. From the __Add column__ menu, select __Standard__, then select __Multiply__, and enter `0.394` then click OK.
+      2. Do the same for `depth` and `width` columns
+      3. Rename the newly created columns to indicate they are inches, `length (inches)`, `depth (inches)`, and `width (inches)`
+
+5. From __Transform__ select __Detect Data Type__ to change the data types of the columns. Inspect the results. 
+
+6. __Challenge__
+
+   1. The `product (brand)` column consists of the product followed by the brand in parenthesis for example `Serum (Livon)`
+   2. Split the column into two: `product` and `brand` columns
+
+   > [!tip]
+   > **Hint**: Use Split Column by Delimiter with `(` as the delimiter. After splitting, you'll need to remove the trailing `)` from the brand column using **Replace** Values. 
 
 ## Step 4: Load Data into Power BI Desktop
 
@@ -408,7 +533,9 @@ In **Query Settings** pane (right), under **Properties**:
 2. Power BI loads all three queries into your data model
 3. You're back in Report View
 
-> [!tip] If you need to edit queries later: **Home** tab → **Transform Data** reopens Power Query Editor.
+> [!tip]
+>
+> If you need to edit queries later: **Home** tab → **Transform Data** reopens Power Query Editor.
 
 ## Step 5: Create Relationships Between Tables
 
@@ -419,6 +546,14 @@ Now we need to connect the three tables.
 1. Click the **Model View** icon (left sidebar, bottom icon)
 2. You'll see three tables: `sales`, `stores`, `products`
 3. Power BI may have auto-created relationships - we'll verify
+
+<img src="images/image-20260127135647645.png" alt="image-20260127135647645" style="zoom:50%;" />
+
+You inspect the relationship, for example if you click on the lines connecting two tables you will see its properties including which column being used to join:
+
+![image-20260127135753466](images/image-20260127135753466.png)
+
+You should always verify this.
 
 ### Understanding Relationships
 
@@ -435,15 +570,22 @@ Relationships connect tables through common columns (keys):
 - Solid line = Active relationship
 - Dashed line = Inactive relationship
 
-### Create sales → products Relationship
+### Optional: Create sales → products Relationship
+
+You can recreate the relationships. Delete the existing relationships and do the following:
 
 1. Drag `product_id` from the `sales` table onto `product_id` in the `products` table
+
 2. A line appears connecting them
+
+   <img src="images/image-20260127135936864.png" alt="image-20260127135936864" style="zoom:50%;" />
+
 3. Double-click the line to verify:
    - **Cardinality**: Many to One (*:1) - many sales rows can reference one product
    - **Cross filter direction**: Single (from products to sales)
    - **Make this relationship active**: ☑️ Checked
-4. Click **OK**
+
+4. Click **Save**
 
 ### Create sales → stores Relationship
 
@@ -452,16 +594,20 @@ Relationships connect tables through common columns (keys):
 
 ### Verify Relationships
 
-Your model should now look like a **star schema**:
+Your model should now look like a **star schema** (not exactly):
 
 - **Fact table** (center): `sales` (transactional data)
 - **Dimension tables** (around it): `products`, `stores` (lookup/descriptive data)
 
-> [!important] **Why relationships matter**: Without relationships, you can't create charts like "Sales by Product Category" because Power BI doesn't know how to link sales data to product data.
+> [!important]
+>
+> **Why relationships matter**: Without relationships, you can't create charts like "Sales by Product Category" because Power BI doesn't know how to link sales data to product data.
 
 ------
 
 ## Step 6: Build Visualizations
+
+![image-20260127142736228](images/image-20260127142736228.png)
 
 Now that data is clean and related, let's create meaningful visuals.
 
@@ -484,80 +630,123 @@ Now that data is clean and related, let's create meaningful visuals.
 ### Chart 2: Revenue Over Time (Line Chart)
 
 1. Select **Line Chart**
+
 2. Add fields:
    - `order_date` → **X-axis** (from `sales` table)
    - Expand the date hierarchy and keep only **Month**
    - `revenue` → **Y-axis**
+   
 3. Format:
    - Title: "Revenue Trend by Month"
+   
    - Enable markers: **Format visual** → **Visual** → **Markers** → On
+   
+     <img src="images/image-20260127140505754.png" alt="image-20260127140505754" style="zoom:50%;" />
 
-### Chart 3: Top 10 Products by Revenue (Stacked Bar Chart)
+### Chart 3: Top 10 Products by Sales (Stacked Bar Chart)
 
 1. Select **Stacked Bar Chart**
+
 2. Add fields:
    - From `products`: `product_name` → **Y-axis**
    - From `sales`: `revenue` → **X-axis**
+
 3. Add Top N Filter:
    - In **Filters** pane → **Filters on this visual**
+
    - Find `product_name`
+
    - Filter type: **Top N**
+
+     <img src="images/image-20260127140948740.png" alt="image-20260127140948740" style="zoom:50%;" />
+
    - Show **Top 10**
-   - By value: drag `revenue` field here
+
+   - By value: drag `sales` field here
+
    - Apply filter
+
 4. Format as desired
 
-### Chart 4: Sales by Store Location (Table Visual)
+5. Rename to ` Top 10 Products by Sales`
+
+### Chart 4: Average Price by Store Location (Table Visual)
 
 1. Select **Table** visual
+
 2. Add fields from `stores` table:
    - `city`
    - `state`
+
 3. Add field from `sales` table:
-   - `revenue` (automatically sums)
-   - `quantity` (automatically sums)
+   - `price` (automatically sums)
+   - Change it to `average`
+
 4. Sort by revenue (descending): Click the `revenue` column header
+
+   <img src="images/image-20260127141406969.png" alt="image-20260127141406969" style="zoom:50%;" />
+
+> [!Note]
+>
+> Answer the following questions:
+>
+> 1. **What is the total revenue for Bakery, Cakes, & Dairy**
+> 2. **How many sales has the product "Namkeen - Rice Kodubale (Sln )"?**
+> 3. **What is the average price in Dallas?**
+
+
+
+Change the formatting:
+
+From __View__ you can select one of the exiting templates
+
+<img src="images/image-20260127141637345.png" alt="image-20260127141637345" style="zoom:50%;" />
 
 ------
 
 ## Step 7: Add Slicers for Interactivity
+
+![image-20260127142755964](images/image-20260127142755964.png)
 
 **Slicers** are visual filters that let users interact with the report.
 
 ### Add a Category Slicer
 
 1. Click blank area of canvas
+
 2. Select **Slicer** from Visualizations pane
+
 3. From `products` table, drag `category` to the **Field** well
+
 4. Position at top-left of report
-5. Test: Click "Beverages" → all visuals update to show only beverages data
+
+5. Change to Dropdown 
+
+   <img src="images/image-20260127142034082.png" alt="image-20260127142034082" style="zoom:50%;" />
+
+6. Test: Click "Beverages" → all visuals update to show only beverages data
+
+7. You can change the font size if you want to make it smaller 
+
+   <img src="images/image-20260127142227635.png" alt="image-20260127142227635" style="zoom:50%;" />
 
 ### Add a Year Slicer
 
 1. Add another **Slicer**
 2. Drag `order_date` from `sales` to Field well
 3. Expand the hierarchy and keep only **Year**
-4. Change slicer style to **Dropdown**:
-   - Select the slicer
-   - Click dropdown arrow (⌄) on the slicer visual
-   - Select **Dropdown**
+4. Change slicer style to **Dropdown**
 5. Position next to category slicer
 
 ### Add a Store State Slicer
 
 1. Add another **Slicer**
 2. From `stores`, drag `state` to Field well
-3. Keep as list or change to **Tile** style for visual buttons
+3. Keep as list or change to **dropdown** style and place next to year slicer
 
 ------
 
 ## Step 8: Formatting and Polish
-
-### Page Background
-
-1. Click blank area (deselect all visuals)
-2. **Visualizations** pane → **Format page** (paint roller)
-3. **Canvas background** → Change color or add image
 
 ### Align Visuals
 
@@ -569,15 +758,16 @@ Now that data is clean and related, let's create meaningful visuals.
 ### Add a Title
 
 1. **Insert** tab → **Text box**
-2. Type: "Sales Data Analysis - 2017"
+
+2. Type: "Sales Data Analysis"
+
 3. Format (increase font size, bold, center align)
+
 4. Position at top of page
 
-### Add a Page
+   ![image-20260127143131866](images/image-20260127143131866.png)
 
-1. At the bottom, click **+** to add a new page
-2. Name it (right-click tab → Rename)
-3. Build additional visuals on page 2
+
 
 ------
 
@@ -588,6 +778,178 @@ Now that data is clean and related, let's create meaningful visuals.
 3. Save to your preferred location
 
 ------
+
+## Step 10: Appending Additional Data
+
+### Add a Page
+
+1. At the bottom, click **+** to add a new page
+2. Name it (right-click tab → Rename)
+3. Build additional visuals on page 2
+
+### Load the Datasets 
+
+1. Click the __Get data__ option and select Text/CSV. Load both `sales2018.csv` and `sales_2019.csv` datasets (one at a time)
+
+2. For the two datasets, make the first row as header.
+
+   1. Both `sales2018` and `sales2019`, have similar columns to  `sales 2017` and can be stacked into one (one on top of the other). Stacking (or appending as called in Power BI) allows us to treat the multiple datasets as one.
+
+   2. Delete the `delivery_date_format2` column from both datasets 
+
+   3. For `sales2019`, change data profiling to include entire data set (from the bottom)
+
+      <img src="images/image-20260127155407673.png" alt="image-20260127155407673" style="zoom:50%;" />
+
+   4. Notice Price has some errors when we expanded the profiling. Select __Remove Errors__
+
+      <img src="images/image-20260127153655055.png" alt="image-20260127153655055" style="zoom:50%;" />
+
+   5. From the __Home__ menu,  click __Append queries__ which gives us two options (Append queries and Append queries as new)
+
+> [!Tip]
+>
+> **Append Queries** in Power BI combines rows from two or more tables with similar structures into an existing table, while **Append Queries as New** creates a distinct, separate table for the combined data. Append Queries (inline) saves memory by reducing table count, whereas Append Queries as New preserves original tables for separate use. 
+
+3. Click __Append queries as new__, and select `sales2018` as the first table, and `sales2019` as the second table. Then click OK.
+
+   <img src="images/image-20260127150614834.png" alt="image-20260127150614834" style="zoom:50%;" />
+
+4. You may see a message on data privacy, just click __Continue__ 
+
+<img src="images/image-20260127150627659.png" alt="image-20260127150627659" style="zoom:50%;" />
+
+On the next screen make sure  __Ignore Privacy Levels checks for this document__ is __unchecked__. In the the drop downs below, select __Organizational__, then click __Save__
+
+<img src="images/image-20260127150653083.png" alt="image-20260127150653083" style="zoom:50%;" />
+
+5. Double click the newly created data set labelled  `Append` and rename it to `sales`.
+
+6. If any of the columns have errors, you can use the __Remove Errors__ option again . This is a good step to ensure everything is clean.
+
+7. The `price` column has several `NA` values. WE can filter this out, by unselecting `NA` values as we did in an earlier step for `sales 2017`. 
+
+8. From the __Transform__ menu, click __Detect data type__ to allow Power Query to help us auto detect the types for the remaining columns. 
+
+   1. Update `Revenue` and `Price` to be **Fixed Decimal**. You may get a window like this:
+
+      <img src="images/image-20260127150839978.png" alt="image-20260127150839978" style="zoom:50%;" />
+
+      Select Replace current. 
+
+9. Now, let’s combine `sales` dataset with `sales 2017` dataset. 
+   1. First, Delete the `delivery_date_format2` column  from the `sales 2017` data set
+
+   2. Select the `sales` dataset which already combines `sales2018` and `sales2019`.
+
+   3. Click  __Append queries__ select __Append queries__
+
+   4. Select `sales 2017` as the Table to append. Then click OK.
+
+
+<img src="images/image-20260127151120560.png" alt="image-20260127151120560" style="zoom:50%;" />
+
+10. Let’s now organize and group/manage our queries better. We don’t need `sales 2017`, `sales2018`, and `sales2019` any more since they are all now combined into the `sales` dataset. 
+
+​	In the Queries panel, right click anywhere and select __New group__ option. 
+
+<img src="images/image-20260126104713405.png" alt="image-20260126104713405" style="zoom:50%;" />
+
+​	Name the group __Helper tables__
+
+​	You can drag and drop the three tables we don’t need into the **Helper tables** group. Alternatively, you can right click and select __Move to group__, then 	select __Helper tables__
+
+<img src="images/image-20260127160002173.png" alt="image-20260127160002173" style="zoom:50%;" />
+
+
+
+11. Click Close & Apply. 
+12. Switch to the Model View. To make the view cleaner to the user, so they do not have to see all the tables when creating reports, you can make them hidden from view. Also, update the model to reflect what you see below:
+
+If you see connections to the `sales2017`, `sales2018`, and `sales2019`, you can keep them or delete them as shown
+
+![image-20260127160325317](images/image-20260127160325317.png)
+
+Notice from the screen shot three tables are hidden (`sales 2017`, `sales2018`, `sales2019`), and three are visible. I updated the relationship to be using the new `sales` table which combines all three years. 
+
+----
+
+## Step 11: Visualizations and Drilling
+
+In the first page, notice the __Year __ selector wont work anymore since it used to point top `sales2017`. You can replace it to use the `sales` dataset.
+
+For now, let’’s focus on creating a new dashboard. In the new page create the following:
+
+#### **Sum of revenue by Category** 
+
+**Stacked column bar**
+
+1. X-axis: `category` 
+2. Y-axis: `Sum of Revenue `
+3. Format Visual
+   1. Data labels turned on
+      1. Background turned on
+   2. For both X-axis and Y-axis turn off the Title option 
+
+#### **Sum of revenue by Year**
+
+**Line chart**
+
+1. X-axis: `order_date` which is a date hierarchy consisting of year, quarter, month, and day
+2. Y-axis: `Sum of Revenue`
+3. Drill to the month level  ![image-20260126113500177](images/image-20260126113500177.png)
+
+ Notice the icon highlighted, if you click this it would drill down from Year to Quarter, if you click again it would further drill down to Month, and again to Date. This allows you to drill within the Date hierarchy (drilling down, and drilling up)
+
+ Keep it at Year, Quarter, and Month level as shown:
+
+   ![image-20260126113601059](images/image-20260126113601059.png)
+
+You can create similar drill hierarchy to the __Sum of revenue by category__ chart:
+
+Drag `sub_category` and place it inside the X-axis right underneath  `category` as shown:
+
+<img src="images/image-20260126113922850.png" alt="image-20260126113922850" style="zoom:50%;" />
+
+Notice the chart will be updated to reflect an ability to drill up and down the hierarchy 
+
+![image-20260126114007707](images/image-20260126114007707.png)
+
+You can click on a bar and then right-click, select drill down. 
+
+<img src="images/image-20260127161157306.png" alt="image-20260127161157306" style="zoom:50%;" />
+
+For example, Select `Beverages`, right click, select Drill down. You should see the following:
+
+![image-20260126114104184](images/image-20260126114104184.png)
+
+For the line chart, Let’s modify the line chart to include `Sum of sales` on the __Secondary y-axis__
+
+1. Drag `sales` to the __Secondary y-axis__
+
+   ![image-20260126114531325](images/image-20260126114531325.png)
+
+2. In the **Format Visual** panel, from the __Visual__ tab, scroll down and you will see __Zoom slider__ option. Turn that on. 
+
+<img src="images/image-20260126114730714.png" alt="image-20260126114730714" style="zoom:50%;" />
+
+This will create two sliders: one for the y-axis and another for the x-axis. Turn the Y-axis off and just keep the X-axis turned on. Lastly click __Save__ to save the visualization as `Sales Data Analysis Part 2`
+
+![image-20260126115014149](images/image-20260126115014149.png)
+
+
+
+## Challenge
+
+How can you fix the visualizations in Page 1? Apply the changes to make it work as shown:
+
+![image-20260127161655520](images/image-20260127161655520.png)
+
+
+
+
+
+----
 
 ## Understanding the Data Model (Deeper Dive)
 
@@ -634,7 +996,9 @@ While we haven't created these yet, here's the difference:
 | Uses disk space                    | No storage cost                              |
 | Example: `Profit = Revenue - Cost` | Example: `Total Sales = SUM(Sales[Revenue])` |
 
-> [!note] We'll cover **DAX** (Data Analysis Expressions) for creating measures in Day 2. For now, focus on using the built-in aggregations (Sum, Average, Count).
+> [!note]
+>
+> We'll cover **DAX** (Data Analysis Expressions) for creating measures in Day 2. For now, focus on using the built-in aggregations (Sum, Average, Count).
 
 ------
 
@@ -666,26 +1030,13 @@ Unlike the Service (which can schedule automatic refreshes), Desktop requires **
 - Refresh pulls latest data from the live connection
 - Requires credentials to remain valid
 
-> [!tip] To change a data source path: **Home** → **Transform Data** → In Power Query, click the gear icon next to "Source" step in Applied Steps.
+> [!tip]
+>
+> To change a data source path: **Home** → **Transform Data** → In Power Query, click the gear icon next to "Source" step in Applied Steps.
 
 ------
 
 ## Exporting and Sharing (Desktop)
-
-### Export Options
-
-From any report page:
-
-**File Menu**:
-
-- **Export to PDF**: Creates a PDF of the current page
-- **Export to PowerPoint**: Each page becomes a slide
-- **Print**: Print current page
-
-**Visual-Level Export**:
-
-- Click a visual → Three dots (⋯) → **Export data**
-- Saves underlying data as CSV or Excel
 
 ### Sharing the .pbix File
 
@@ -747,7 +1098,9 @@ Join tables on a key column (like SQL JOIN):
    - **Full Outer**: All rows from both
 4. Expand the merged column to bring in desired fields
 
-> [!important] **Merge vs Relationships**: Use **Merge** in Power Query when you want to denormalize data (flatten into one table). Use **Relationships** in the model for star schema (keeps tables separate, better performance for large datasets).
+> [!important]
+>
+> **Merge vs Relationships**: Use **Merge** in Power Query when you want to denormalize data (flatten into one table). Use **Relationships** in the model for star schema (keeps tables separate, better performance for large datasets).
 
 ### Conditional Columns
 
@@ -813,7 +1166,9 @@ Desktop doesn't have built-in version control like the Service, so:
 - Use `.pbix` as binary files
 - Or use **Power BI Projects** (PBIP format, new feature) for text-based version control
 
-> [!tip] Before making major changes, **Save As** a new version. Desktop doesn't have an undo history across sessions.
+> [!tip]
+>
+> Before making major changes, **Save As** a new version. Desktop doesn't have an undo history across sessions.
 
 ------
 

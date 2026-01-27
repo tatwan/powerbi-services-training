@@ -409,24 +409,22 @@ Data types are critical in Power BI because they determine:
 
    ![image-20260125210325297](images/image-20260125210325297.png)
 
-2. Rename the sources by double clicking their names
+   1. Rename the sources by double clicking their names
+      1. `store_cities` to `stores`
+      2. `sales2017_raw` to `sales 2017`
+      3. We can connect the two dataset through the `store_id` column present in both.
 
-   1. `store_cities` to `stores`
-   2. `sales2017_raw` to `sales 2017`
-   3. We can connect the two dataset through the `store_id` column present in both.
+   2. We need to clean the dataset first:
+      1. Make the first row as headers. You can do this by selecting __Use first row as headers__
 
-3. We need to clean the dataset first:
+   3. The `store_size` column we can extract the measures (values)
+      1. Click on `store_size`. From the __Transform__ menu select __Extract__, then __Text Before Delimiter__
+      2. For the __Delimiter__ you can enter a space then click OK.
+      3. Rename the column rom `store_size` to `store size`.  One way to accomplish this is by double clicking the column name.
 
-   1. Make the first row as headers. You can do this by selecting __Use first row as headers__
-
-4. The `store_size` column we can extract the measures (values)
-
-   1. Click on `store_size`. From the __Transform__ menu select __Extract__, then __Text Before Delimiter__
-   2. For the __Delimiter__ you can enter a space then click OK.
-   3. Rename the column rom `store_size` to `store size`.  One way to accomplish this is by double clicking the column name.
    4. Change the data type from `Text` to `Whole Number`
 
-5. You will need to split state, state abbreviation, and city in the `state - state abr - city` column.
+2. You will need to split state, state abbreviation, and city in the `state - state abr - city` column.
 
    1. Select the `state - state abr - city` column. From the __Home__ menu select __Split column__, select __By delimiter__
 
@@ -438,14 +436,14 @@ Data types are critical in Power BI because they determine:
 
    4. Finally, rename the columns: `state abr`, `state`, and `city`
 
-6. Finally, split the last column `lat/long`
+3. Finally, split the last column `lat/long`
 
    1. Similar to step 5, select __Split column__, select `--Custom--` separator, then type ` /` (space then `/`). Click OK.
    2. Rename the columns to `lat` and `long`
 
-7. Go to the __Transform__ menu, and try the __Detect data type__ for the remaining columns. 
+4. Go to the __Transform__ menu, and try the __Detect data type__ for the remaining columns. 
 
-8. When we did split columns, some values had leading white spaces that are hard to see. 
+5. When we did split columns, some values had leading white spaces that are hard to see. 
 
    1. For `state` column, you can right click, go down to select __Transform column__, then select __Text transforms__, then select __Trim__
    2. Do the same for the `city` column
