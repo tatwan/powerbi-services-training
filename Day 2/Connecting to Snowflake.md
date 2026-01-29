@@ -1,5 +1,7 @@
 # Dashboard 1: Sales Performance & Music Analytics
 
+[toc]
+
 ## Activity Overview
 
 In this activity, you'll build a complete sales dashboard using the Chinook music store database. You'll create KPI cards, charts, and tables to analyze music sales performance.
