@@ -238,6 +238,58 @@ Now let's create three charts on your report canvas.
 >
 > Unlike the Service (which auto-saves), Desktop requires manual saves. Save frequently with **Ctrl+S**.
 
+### Understanding Power BI File Formats
+
+Power BI Desktop has three file formats you'll encounter. They look similar but serve very different purposes:
+
+| Format | Name | Contains data? | Use it when… |
+|---|---|---|---|
+| **.pbix** | Power BI Report | ✅ Yes — compressed copy of all imported data | Day-to-day work. Share with a colleague who needs the full working file. |
+| **.pbit** | Power BI Template | ❌ No data — structure only | You want to share the report layout, model, and queries without exposing the underlying data. Recipients connect their own data source when they open it. |
+| **.pbip** | Power BI Project | ❌ No data — source files on disk | Developer/team mode. Stores the model and report as individual text files so you can use Git for version control. Advanced use case. |
+
+**The .pbix — what's inside the package**
+
+When you save as .pbix, Power BI bundles everything into a single compressed file:
+
+| What's inside | Details |
+|---|---|
+| **Your data** | A compressed copy of every table you imported. The data travels with the file — send it to someone and they'll see the exact same numbers, even without access to the original CSV. |
+| **Power Query steps** | Every transformation you applied (remove rows, change types, rename columns) is stored as a recipe. When you refresh, Power BI re-runs these steps against the source. |
+| **The data model** | Table relationships, calculated columns, and DAX measures — all saved. |
+| **Report pages** | Every page, visual, slicer, and format setting. |
+| **Theme & layout** | Colors, fonts, visual positions. |
+
+**Does it contain the original CSV files?** No — it contains a *compressed copy of the data at the time you loaded it*. If your CSV changes tomorrow, your report won't update until you click **Home → Refresh**. Power Query then re-reads the source file and reapplies all your transformation steps.
+
+**How big does it get?** For small datasets like this one, a .pbix is typically just a few MB. Large enterprise datasets with millions of rows can reach several hundred MB — Power BI uses a highly efficient columnar compression format (called VertiPaq) that often compresses data to 10–20% of its original size.
+
+**The .pbit — template files**
+
+A .pbit saves everything *except* the data. When someone opens a .pbit, Power BI prompts them to connect to a data source — they supply their own credentials or file path, and their data flows into your pre-built structure.
+
+This is useful for:
+- Distributing a report framework to a team without sharing sensitive data
+- Course materials where every student connects their own database
+- Company report templates where the structure is standardized but the data refreshes from each user's environment
+
+**The .pbip — project files (advanced)**
+
+A .pbip doesn't store the report as a single binary file. Instead it saves the model definition and report layout as human-readable JSON/TMDL files in a folder on disk. This means you can track changes in Git — useful for development teams building complex reports collaboratively. You won't use this format in this course, but it's worth knowing it exists.
+
+**Export options (different from Save As):**
+
+| Option | What it does |
+|---|---|
+| **File → Export → Export to PDF** | Static snapshot of your report pages — useful for sharing with people who don't have Power BI |
+| **File → Export → Export to PowerPoint** | Each report page becomes a PowerPoint slide (static images) |
+| **Right-click a visual → Export data** | Exports the data behind one visual to CSV or Excel |
+| **Publish to Service** | Uploads the .pbix to Power BI Service where others view it in a browser (requires Power BI Pro) |
+
+> [!note]
+>
+> For this course, we work exclusively with .pbix files. Think of them the same way you think of an Excel .xlsx — one file, everything included, email it to share it.
+
 ## Step 5: Test Interactivity
 
 1. Click on a bar in one of your charts
