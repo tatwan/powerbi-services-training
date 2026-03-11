@@ -1,9 +1,5 @@
 # PowerBI Desktop (Day 1)
 
-
-
-[toc]
-
 ## Learning Objectives
 
 By the end of Day 1, you will be able to:

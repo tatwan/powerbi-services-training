@@ -2,7 +2,7 @@
 
 # PowerBI Service (Day 1)
 
-[toc]
+
 
 ## Learning Objectives
 

@@ -1,6 +1,6 @@
 # Dashboard 1: Sales Performance & Music Analytics
 
-[toc]
+
 
 ## The Scenario
 
