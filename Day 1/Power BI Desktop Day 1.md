@@ -41,7 +41,9 @@ Power BI Desktop is a **free Windows application** you install on your computer.
 | **Dashboards**        | ❌ Not available               | ✅ Available                                 |
 | **Mobile Access**     | ❌ Windows only                | ✅ Access from any device                    |
 
-> [!important] **For this course, we use Power BI Desktop**. All the core skills you learn (data transformation, modeling, DAX, visualizations) work identically in both Desktop and Service. If you later get Power BI Pro, you can simply publish your .pbix files to the Service.
+> [!important] 
+>
+> **For this course, we use Power BI Desktop**. All the core skills you learn (data transformation, modeling, DAX, visualizations) work identically in both Desktop and Service. If you later get Power BI Pro, you can simply publish your .pbix files to the Service.
 
 ### What is a .pbix File?
 
@@ -76,7 +78,9 @@ Think of it like an Excel workbook - one file contains everything.
 4. Run the installer and follow prompts
 5. Launch Power BI Desktop from Start menu
 
-> [!tip] The Microsoft Store version automatically updates when new features are released. The standalone installer requires manual updates.
+> [!tip] 
+>
+> The Microsoft Store version automatically updates when new features are released. The standalone installer requires manual updates.
 
 ------
 
@@ -126,6 +130,36 @@ The white central area is your **report canvas** where you design pages:
 ------
 
 # Part 1: Creating Your First Report
+
+## The Scenario
+
+You've just joined a small real estate advisory firm as a junior data analyst. A senior partner is preparing a presentation for a client — an investment fund considering entering the New York City property market — and she needs a quick visual overview of recent sales activity.
+
+She hands you a CSV file exported from the city's public property transaction records and says:
+
+> *"I need to understand where the action is. Which boroughs and neighborhoods have the highest sale volumes? What types of buildings are selling? Are there any areas that look overpriced or undervalued compared to others? Just give me something I can look at."*
+
+Your job: get this data into Power BI and build three exploratory charts that answer her questions. This is a first look — no cleaning required, no complex modeling. You're learning the tool and the workflow.
+
+**What the data contains:**
+
+| Column | What it means |
+|---|---|
+| `Area` | Borough (Manhattan, Brooklyn, Queens, Bronx, Staten Island) |
+| `NEIGHBORHOOD` | Sub-area within the borough |
+| `BUILDING CLASS CATEGORY` | Property type (co-op, condo, family home, commercial, etc.) |
+| `SALE DATE` | Date of the transaction |
+| `SALES PRICE` | Sale price in USD |
+| `LAND SQUARE FEET` / `GROSS SQUARE FEET` | Property size |
+| `YEAR BUILT` | Age of the building |
+
+**Questions this data can answer:**
+- Which borough has the highest total sales volume?
+- Which neighborhoods have the most transactions?
+- What property types dominate sales in each area?
+- How are sale prices distributed — are there extreme outliers?
+
+---
 
 ## Step 1: Getting the Data
 
@@ -217,17 +251,55 @@ Now let's create three charts on your report canvas.
 
 ------
 
-# Part 2: Working with Sales 2017 Data
+# Part 2: Building a Sales Analytics Dashboard
 
-Now we'll work with messy, real-world data and use **Power Query** to clean it.
+## The Scenario
 
-## The Dataset
+You're now a data analyst at a mid-size retail company that operates physical stores across multiple Indian cities. The company sells across several product categories and has been running various promotions alongside its standard pricing.
 
-- **sales2017_raw.csv**: Sales data from an e-commerce store (messy, needs cleaning)
-- **stores.csv**: Store location information
-- **products.csv**: Product details
+The VP of Sales walks in on Monday morning and drops three years of transaction data on your desk:
 
-**Goal**: Visualize sales by category, promotions, time trends, and delivery metrics.
+> *"We've been collecting sales data since 2017 but nobody has actually looked at it properly. I need to know: are our promotions actually working? Which product categories are driving revenue? Are some stores consistently underperforming? And why does delivery time vary so much — is it hurting sales? I need answers before the quarterly review."*
+
+There's a catch: the 2017 data is a mess — formatting inconsistencies, wrong data types, and some columns that were clearly added by someone who wasn't thinking about downstream analysis. The 2018 and 2019 files are cleaner. Your first job is to fix the data, then combine all three years and build a dashboard that answers the VP's questions.
+
+**What the data contains:**
+
+| Column | What it means |
+|---|---|
+| `order_id` | Unique transaction identifier |
+| `product_id` | Product reference |
+| `store_id` | Which store made the sale |
+| `order_date` | Date of purchase |
+| `sales` | Units sold |
+| `revenue` | Revenue for the transaction (USD) |
+| `promo_type_1` / `promo_bin_1` | Primary promotion type and discount bucket |
+| `promo_type_2` / `promo_bin_2` | Secondary promotion (if any) |
+| `promo_discount_2` | Discount percentage for the second promotion |
+| `delivery_date_format1/2` | Delivery date (stored inconsistently — you'll need to fix this) |
+
+The **producthierarchy.csv** adds category, sub-category, and hierarchy labels to each product. The **store_cities.csv** adds city and state to each store.
+
+**Questions this data can answer (once it's clean):**
+- Which product categories generate the most revenue?
+- Do promotions increase sales volume — or just discount existing sales?
+- Which stores and cities are over/underperforming?
+- Is delivery speed correlated with order volume?
+- How did revenue trend month-over-month across 2017–2019?
+
+**Why the cleaning matters:** The VP asked these questions — but the raw data can't answer them yet. Power Query is the bridge between messy source data and meaningful analysis. Everything you do in this part (fixing types, removing junk rows, combining files) is what a real analyst does before a single chart gets built.
+
+## The Datasets
+
+| File | Contents |
+|---|---|
+| `sales2017_raw.csv` | 2017 transactions — messy, needs cleaning in Power Query |
+| `sales2018.csv` | 2018 transactions — clean |
+| `sales2019.csv` | 2019 transactions — clean |
+| `producthierarchy.csv` | Product dimension: category, sub-category, hierarchy labels |
+| `store_cities.csv` | Store dimension: city and state for each store |
+
+---
 
 ## Step 1: Import the Data Files
 
@@ -941,9 +1013,57 @@ This will create two sliders: one for the y-axis and another for the x-axis. Tur
 
 ## Challenge
 
-How can you fix the visualizations in Page 1? Apply the changes to make it work as shown:
+You've spent the day building Power BI skills step by step. Now put them together independently.
+
+> **Open the mockup:** [`challenge-mockup.html`](../challenge-mockup.html) — view it in your browser as your target reference.
+
+### Part A — Fix Page 1 (10 min)
+
+The screenshot below shows what Page 1 *should* look like. Compare it to your current Page 1 and fix whatever isn't matching:
 
 ![image-20260127161655520](images/image-20260127161655520.png)
+
+Look for issues with: chart types, axis fields, sorting, column ordering, and visual titles. Nothing requires new data — it's all about using the right fields in the right places.
+
+---
+
+### Part B — Build a New Summary Page from Scratch (30–40 min)
+
+Add a **new page** to your report and name it `Sales Summary`. Build the dashboard shown in `challenge-mockup.html` using the `sales`, `producthierarchy`, and `store_cities` tables you've already loaded and related.
+
+**Required visuals:**
+
+| Visual | Type | Key fields |
+|---|---|---|
+| Total Revenue | Card | SUM of revenue column |
+| Total Orders | Card | COUNT of order_id |
+| Avg Revenue / Order | Card | Revenue ÷ Orders |
+| Active Stores | Card | DISTINCTCOUNT of store_id |
+| Monthly Revenue Trend | Line Chart | order_date (by Month) → revenue |
+| Revenue by Product Category | Bar Chart | Category (from producthierarchy) → revenue |
+| Top 10 Products by Revenue | Table | product name, category, revenue — Top N filtered |
+| Revenue by State | Bar Chart | State (from store_cities) → revenue, Top 10 |
+
+**Required slicer:**
+- Add a **Year slicer** using the order_date column — students should be able to filter the whole page to 2017, 2018, or 2019 individually.
+
+**Things you'll need to figure out:**
+
+- The `producthierarchy` table has a column called `category || sub_category` — you'll need to split it in Power Query to extract just the category
+- The `store_cities` table has state information embedded in a combined column (e.g., "TX – Texas – Houston") — you may need to split or extract just the state abbreviation
+- Your line chart date axis should show months, not individual days — use the date hierarchy or set the axis to "Month" level
+- Format all revenue values as currency
+
+**Success criteria:**
+- [ ] 4 KPI cards visible at the top
+- [ ] Line chart shows a rising trend from 2017 → 2019
+- [ ] Category bar chart pulls from the `producthierarchy` table (not the `sales` table directly)
+- [ ] Top 10 Products table uses a Top N filter on `product_id` or product name
+- [ ] State bar chart pulls location from `store_cities` table
+- [ ] Year slicer cross-filters all visuals on the page
+- [ ] Consistent color scheme applied
+
+**Stretch goal:** Add a **promotion analysis** visual — a column chart comparing revenue for orders with a promotion (`promo_type_1` is not blank) vs. without promotion. This will tell you whether promotions actually drive higher revenue.
 
 
 

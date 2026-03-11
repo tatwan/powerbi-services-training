@@ -2,17 +2,50 @@
 
 [toc]
 
+## The Scenario
+
+You've been hired as a data analyst at **Chinook Music**, a digital music retailer that sells tracks and albums to customers worldwide through its online store. The company has been operating since 2009 and has accumulated five years of transaction data — all stored in a Snowflake cloud data warehouse.
+
+It's Q4 planning time. The Head of Sales has scheduled a business review with the leadership team and needs a dashboard built before the meeting:
+
+> *"We've never had a proper sales dashboard — just spreadsheets we email around. I need to see our top-line revenue numbers, understand which genres and artists are driving sales, know where our customers are coming from geographically, and understand which of our support reps is bringing in the most business. Can you put something together?"*
+
+This is a real analytics scenario: a live cloud database, a multi-table data model, and a business stakeholder who needs answers fast. Your job is to connect to the data, build the relationships, and produce a dashboard that a non-technical executive can read in 30 seconds.
+
+**The Chinook data model — what you're working with:**
+
+| Table | What it contains |
+|---|---|
+| `INVOICE` | One row per sale: customer, date, billing country, total |
+| `INVOICE_LINE` | Line items: which tracks were in each invoice, quantity, unit price |
+| `TRACK` | Track catalog: name, album, genre, media type, duration, unit price |
+| `ALBUM` | Album names linked to artists |
+| `ARTIST` | Artist names |
+| `GENRE` | Genre labels (Rock, Jazz, Classical, etc.) |
+| `CUSTOMER` | Customer details: name, country, city, support rep assigned |
+
+**Questions this data can answer:**
+- What is total revenue, and how has it trended year over year?
+- Which genres generate the most revenue — and which are declining?
+- Who are the top-selling artists and albums?
+- Which countries have the most customers and highest revenue?
+- Which support rep manages the highest-value customer accounts?
+
+**Why cloud data matters here:** Unlike Day 1's local CSV files, this data lives in Snowflake — a cloud data warehouse. This is how most enterprise analytics works. Power BI connects directly to the cloud, you choose whether to import a snapshot or query live (DirectQuery), and the data model you build reflects the real relational structure of the business.
+
+---
+
 ## Activity Overview
 
-In this activity, you'll build a complete sales dashboard using the Chinook music store database. You'll create KPI cards, charts, and tables to analyze music sales performance.
+In this activity, you'll build a complete sales dashboard using the Chinook database. You'll connect to Snowflake, build a star schema data model, and create KPI cards, charts, and tables to answer the Head of Sales' questions.
 
 **What you'll create:**
 
-- 4 KPI summary cards
+- 4 KPI summary cards (revenue, customers, tracks sold, average order value)
 - Revenue trend line chart
 - Genre distribution donut chart
 - Top artists and albums tables
-- Geographic sales map
+- Geographic customer map
 
 ------
 
@@ -444,8 +477,108 @@ If you finish early, try these enhancements:
 
 ------
 
+## Extension: Drill-Through Pages
+
+**Estimated time:** 15 minutes
+**Prerequisite:** Dashboard 1 complete
+
+Drill-through lets users right-click any data point in a visual and navigate to a detail page filtered to that specific context. It's one of the most practical navigation features in Power BI and something your report users will expect.
+
+In this extension you'll build a **Country Detail** drill-through page: right-click any country on the geographic map → land on a page showing every invoice from that country.
+
+---
+
+### Step 1: Add a new report page
+
+1. At the bottom of the screen, click the **+** icon next to the page tabs
+2. Double-click the new tab and rename it: `Country Detail`
+
+---
+
+### Step 2: Set the drill-through field
+
+This is the key step — it tells Power BI which field triggers the drill-through.
+
+1. Make sure you're on the `Country Detail` page
+2. In the **Visualizations** pane, look for the **Drill through** section (at the bottom of the pane, below Filters)
+3. Drag `CUSTOMER[COUNTRY]` into the **Add drill-through fields here** well
+
+> **What you should see:** Power BI automatically adds a **Back** button to the page (top-left corner). This is the button users click to return to the previous page after drilling through. Don't delete it.
+
+---
+
+### Step 3: Build the detail visuals on this page
+
+Now add visuals that make sense for "I want to see everything about a specific country":
+
+**Visual 1 — Country KPI card**
+
+1. Add a **Card** visual
+2. Drag `CUSTOMER[COUNTRY]` → Fields
+3. This shows which country was drilled into
+4. Format: large font, place at the top of the page
+
+**Visual 2 — Invoice detail table**
+
+1. Add a **Table** visual
+2. Add these columns:
+   - `CUSTOMER[Full Name]` → Columns
+   - `INVOICE[INVOICE_DATE]` → Columns
+   - `INVOICE[TOTAL]` → Columns
+3. Sort by `INVOICE_DATE` descending (most recent first)
+4. Title: `All Invoices`
+
+**Visual 3 — Revenue by customer (bar chart)**
+
+1. Add a **Clustered Bar Chart**
+2. Fields:
+   - `CUSTOMER[Full Name]` → Y-axis
+   - `Total Revenue` measure → X-axis
+3. Title: `Revenue by Customer`
+
+**Visual 4 — Revenue over time (line chart)**
+
+1. Add a **Line Chart**
+2. Fields:
+   - `INVOICE[INVOICE_DATE]` → X-axis
+   - `Total Revenue` → Y-axis
+3. Title: `Revenue Over Time`
+
+---
+
+### Step 4: Test the drill-through
+
+1. Click the **Page 1** tab (your main Dashboard 1 page)
+2. Find the **geographic map** visual — click on any country to select it (e.g., USA)
+3. **Right-click** the highlighted country on the map
+4. In the context menu, select **Drill through → Country Detail**
+
+> **What you should see:** Power BI navigates to the `Country Detail` page. All 4 visuals are now filtered to show only data from that country. The invoice table shows only invoices from customers in that country. The **Back** button in the top-left returns you to the map page.
+
+> **If "Drill through" doesn't appear in the right-click menu:** The drill-through field wasn't set correctly. Go back to the `Country Detail` page → check that `CUSTOMER[COUNTRY]` is in the Drill through well (not in the Filters well).
+
+---
+
+### Why drill-through is powerful
+
+Without drill-through, a user who sees an interesting country on the map has no way to dig deeper — they'd have to manually set a filter. Drill-through makes the report self-navigating: the summary page is the entry point, detail pages answer "tell me more about this specific thing".
+
+**Common drill-through patterns in real dashboards:**
+- Summary map → Country detail
+- Top 10 customers table → Individual customer purchase history
+- Genre donut chart → All tracks in that genre
+- Monthly revenue line → All invoices in that month
+
+---
+
 ## What You Learned
 
-✅ How to connect Power BI to Snowflake ✅ Creating star schema relationships in Model View ✅ Building DAX measures for aggregations ✅ Creating KPI cards for dashboard summaries ✅ Using Top N filters on visuals ✅ Formatting and polishing a professional dashboard
+✅ How to connect Power BI to Snowflake
+✅ Creating star schema relationships in Model View
+✅ Building DAX measures for aggregations
+✅ Creating KPI cards for dashboard summaries
+✅ Using Top N filters on visuals
+✅ Formatting and polishing a professional dashboard
+✅ Building drill-through pages for contextual navigation
 
 ------

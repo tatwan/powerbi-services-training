@@ -1,533 +1,402 @@
-# Dashboard 2: Customer Analytics & Geographic Distribution
+# Hints — Customer Analytics Dashboard
 
-## Activity Overview
+> **Use this file only after you've attempted each step on your own.**
+> Work through the hints one section at a time — don't read ahead.
+> Cross-reference the rendered mockup (`mockup.html`) at each stage to check your layout.
 
-In this activity, you'll build a customer-focused dashboard using the Chinook music store database. You'll analyze customer behavior, geographic distribution, and support representative performance.
-
-**What you'll create:**
-
-- 4 KPI summary cards
-- Customer distribution map
-- Customer segmentation treemap
-- Top 10 customers by lifetime value
-- Top cities by customer count
-- Support representative performance visuals
-
-**Estimated time:** 45-60 minutes
-
-------
+---
 
 ## Step 1: Connect to Snowflake and Load Data
 
-1. **Open Power BI Desktop** (or start a new file)
-2. **Get Data**:
-   - Click **Home** tab → **Get Data** → **More**
-   - Search for "Snowflake" and select **Snowflake**
-   - Click **Connect**
-3. **Enter Connection Details**:
-   - Server: `[your-snowflake-account].snowflakecomputing.com`
-   - Warehouse: `[your-warehouse-name]`
-   - Database: `CHINOOK_DB` (or your database name)
-   - Click **OK**
-4. **Authenticate**:
-   - Enter your Snowflake username and password
-   - Click **Connect**
-5. **Select Tables**:
-   - In the Navigator window, expand your database and schema
-   - Check the boxes for these 4 tables:
-     - ✅ `CUSTOMER`
-     - ✅ `INVOICE`
-     - ✅ `INVOICE_LINE`
-     - ✅ `EMPLOYEE`
-   - Click **Load**
-6. **Wait for data to load**
+1. Open Power BI Desktop → new blank file
+2. **Home** → **Get Data** → **More** → search for **Snowflake** → **Connect**
+3. Enter connection details:
+   - **Server**: `[your-account].snowflakecomputing.com`
+   - **Warehouse**: `[your-warehouse]`
+   - **Database**: `CHINOOK_DB`
+4. Authenticate with your Snowflake username and password
+5. In the Navigator, check these 4 tables and click **Load**:
+   - ✅ `CUSTOMER`
+   - ✅ `INVOICE`
+   - ✅ `INVOICE_LINE`
+   - ✅ `EMPLOYEE`
 
-> [!note]
+> **📋 Checkpoint — Data pane (right side)**
+> You should see 4 tables listed. Expand each one to confirm the columns below exist before continuing:
 >
-> This dashboard uses fewer tables than Dashboard 1 since we're focusing on customer and employee analytics rather than product sales.
+> | Table | Key columns to confirm |
+> |---|---|
+> | CUSTOMER | CUSTOMER_ID, FIRST_NAME, LAST_NAME, CITY, COUNTRY, SUPPORT_REP_ID |
+> | INVOICE | INVOICE_ID, CUSTOMER_ID, INVOICE_DATE, TOTAL |
+> | INVOICE_LINE | INVOICE_LINE_ID, INVOICE_ID, UNIT_PRICE, QUANTITY |
+> | EMPLOYEE | EMPLOYEE_ID, FIRST_NAME, LAST_NAME, TITLE |
+>
+> **If a table is missing:** go back to Home → Transform Data → check the query list on the left for any errors marked with a ⚠️ yellow triangle.
 
-------
+---
 
 ## Step 2: Create Relationships in Model View
 
-1. Click **Model View** icon (left sidebar, bottom icon)
-2. **Arrange your tables**:
-   - Center: `INVOICE` (fact table)
-   - Around it: `CUSTOMER`, `INVOICE_LINE`, `EMPLOYEE`
-3. **Create the following relationships** (drag from one column to another):
+1. Click the **Model View** icon (third icon in the left sidebar — looks like three connected boxes)
+2. Drag the tables to arrange them in a star pattern — `INVOICE` in the center
+3. Create relationships by dragging from one column to another:
    - `CUSTOMER[CUSTOMER_ID]` → `INVOICE[CUSTOMER_ID]`
    - `INVOICE[INVOICE_ID]` → `INVOICE_LINE[INVOICE_ID]`
    - `CUSTOMER[SUPPORT_REP_ID]` → `EMPLOYEE[EMPLOYEE_ID]`
-4. **Verify relationships** - each line should show "1" on one side and "*" on the other
-5. Click **Report View** to return to canvas
 
-> [!important]
+> **📋 Checkpoint — Model View canvas**
+> You should see 3 relationship lines connecting the 4 tables:
 >
-> The relationship between CUSTOMER and EMPLOYEE connects customers to their support representatives. This enables analysis by sales rep.
+> ```
+> EMPLOYEE ──── CUSTOMER ──── INVOICE ──── INVOICE_LINE
+> ```
+>
+> Each line should show **1** on one end and **\*** (many) on the other.
+> - CUSTOMER → INVOICE: 1 (customer) to many (invoices) ✓
+> - INVOICE → INVOICE_LINE: 1 (invoice) to many (line items) ✓
+> - EMPLOYEE → CUSTOMER: 1 (employee) to many (customers) ✓
+>
+> **If a relationship shows a warning:** double-click the line to edit it. The cardinality should be "Many to one (*:1)" and Cross filter direction should be "Single".
 
-------
+---
 
 ## Step 3: Create Calculated Columns
 
-We need to create some calculated columns for better reporting.
+Switch to **Report View** first, then use the **Modeling** tab → **New Column** for each of these.
 
-### Create Customer Full Name
+### CUSTOMER table — Full Name
+Click the `CUSTOMER` table in the Data pane, then:
+```dax
+Full Name = CUSTOMER[FIRST_NAME] & " " & CUSTOMER[LAST_NAME]
+```
 
-1. Click on `CUSTOMER` table in the **Data** pane
+### EMPLOYEE table — Full Name
+Click the `EMPLOYEE` table, then:
+```dax
+Full Name = EMPLOYEE[FIRST_NAME] & " " & EMPLOYEE[LAST_NAME]
+```
 
-2. **Modeling** tab → **New Column**
+### INVOICE_LINE table — Revenue
+Click `INVOICE_LINE`, then:
+```dax
+Revenue = INVOICE_LINE[UNIT_PRICE] * INVOICE_LINE[QUANTITY]
+```
 
-3. Type:
-
-   ```DAX
-   Full Name = CUSTOMER[FIRST_NAME] & " " & CUSTOMER[LAST_NAME]
-   ```
-
-4. Press **Enter**
-
-### Create Employee Full Name
-
-1. Click on `EMPLOYEE` table
-
-2. **Modeling** tab → **New Column**
-
-3. Type:
-
-   ```DAX
-   Full Name = EMPLOYEE[FIRST_NAME] & " " & EMPLOYEE[LAST_NAME]
-   ```
-
-4. Press **Enter**
-
-### Create Revenue in Invoice Line
-
-1. Click on `INVOICE_LINE` table
-
-2. **Modeling** tab → **New Column**
-
-3. Type:
-
-   ```DAX
-   Revenue = INVOICE_LINE[UNIT_PRICE] * INVOICE_LINE[QUANTITY]
-   ```
-
-4. Press **Enter**
-
-------
-
-## Step 4: Create Key Measures
-
-Now we'll create the measures needed for our KPIs and charts.
-
-### Customer Metrics
-
-1. **Total Customers**:
-
-   - Right-click `CUSTOMER` table → **New Measure**
-
-   - Type:
-
-     ```DAX
-     Total Customers = DISTINCTCOUNT(CUSTOMER[CUSTOMER_ID])
-     ```
-
-2. **Customer Lifetime Value**:
-
-   - Right-click `CUSTOMER` table → **New Measure**
-
-   - Type:
-
-     ```DAX
-     Customer Lifetime Value = DIVIDE(    SUM(INVOICE_LINE[Revenue]),    [Total Customers])
-     ```
-
-3. **Countries Served**:
-
-   - Right-click `CUSTOMER` table → **New Measure**
-
-   - Type:
-
-     ```DAX
-     Countries Served = DISTINCTCOUNT(CUSTOMER[COUNTRY])
-     ```
-
-4. **Avg Orders per Customer**:
-
-   - Right-click `INVOICE` table → **New Measure**
-
-   - Type:
-
-     ```DAX
-     Avg Orders per Customer = DIVIDE(    COUNTROWS(INVOICE),    [Total Customers])
-     ```
-
-### Revenue Metrics
-
-1. **Total Revenue**:
-
-   - Right-click `INVOICE_LINE` table → **New Measure**
-
-   - Type:
-
-     ```DAX
-     Total Revenue = SUM(INVOICE_LINE[Revenue])
-     ```
-
-> [!tip]
+> **📋 Checkpoint — Data pane**
+> After creating all three columns, expand each table in the Data pane. You should see:
+> - `CUSTOMER` → a new `Full Name` column (with a calculator icon **fx**)
+> - `EMPLOYEE` → a new `Full Name` column
+> - `INVOICE_LINE` → a new `Revenue` column
 >
-> Format your measures for better readability: Right-click measure → Format → Choose currency or number format.
+> **Quick sanity check:** Click the `INVOICE_LINE` table → switch to **Table View** (second icon in the left sidebar). Sort the `Revenue` column descending. The highest values should be around $25–$99. If you see very large numbers like $10,000+, check that UNIT_PRICE and QUANTITY are both numeric columns (not text).
 
-------
+---
 
-## Step 5: Create KPI Cards
+## Step 4: Create Measures
 
-Create 4 KPI cards across the top of the dashboard.
+Right-click the table name in the Data pane → **New Measure** for each. Place measures in the table that makes the most logical sense (shown below).
 
-### KPI Card 1: Total Customers
+### In the CUSTOMER table
 
-1. Click blank area on canvas
-2. Select **Card** visual from Visualizations pane
-3. Drag `Total Customers` measure → **Fields** well
-4. Resize and position in top-left corner
-5. **Format the card**:
-   - **Callout value**:
-     - Font size: **28**
-   - **Category label**:
-     - Text: "Total Customers"
-     - Font size: **10**
+```dax
+Total Customers = DISTINCTCOUNT(CUSTOMER[CUSTOMER_ID])
+```
 
-### KPI Card 2: Average Lifetime Value
+```dax
+Countries Served = DISTINCTCOUNT(CUSTOMER[COUNTRY])
+```
 
-1. Click blank area
-2. Select **Card** visual
-3. Drag `Customer Lifetime Value` measure → **Fields**
-4. Position next to first card
-5. **Format**:
-   - Right-click the measure in Fields well → Format → Currency → Decimal places: **0**
-   - Update label: "Avg Lifetime Value"
+```dax
+Customer Lifetime Value = DIVIDE(
+    SUM(INVOICE_LINE[Revenue]),
+    [Total Customers]
+)
+```
 
-### KPI Card 3: Countries Served
+### In the INVOICE table
 
-1. Click blank area
-2. Select **Card** visual
-3. Drag `Countries Served` measure → **Fields**
-4. Position next to second card
-5. Format label: "Countries Served"
+```dax
+Avg Orders per Customer = DIVIDE(
+    COUNTROWS(INVOICE),
+    [Total Customers]
+)
+```
 
-### KPI Card 4: Avg Orders per Customer
+### In the INVOICE_LINE table
 
-1. Click blank area
-2. Select **Card** visual
-3. Drag `Avg Orders per Customer` measure → **Fields**
-4. Position next to third card
-5. **Format**:
-   - Right-click measure → Format → Number → Decimal places: **1**
-   - Label: "Avg Orders/Customer"
+```dax
+Total Revenue = SUM(INVOICE_LINE[Revenue])
+```
 
-> [!tip]
+> **📋 Checkpoint — expected measure values**
+> Click each measure in the Data pane. The value shown in the bottom status bar (or a blank card visual) should be approximately:
 >
-> Select all 4 cards, then Format → Align → Align Top and Distribute Horizontally.
+> | Measure | Expected value |
+> |---|---|
+> | Total Customers | **59** |
+> | Countries Served | **24** |
+> | Customer Lifetime Value | **$39.47** |
+> | Avg Orders per Customer | **~7.0** |
+> | Total Revenue | **~$2,328** |
+>
+> **If Total Revenue shows $0 or blank:** check that the `Revenue` calculated column exists in INVOICE_LINE and that the measure references `INVOICE_LINE[Revenue]` (not `INVOICE_LINE[UNIT_PRICE]`).
+>
+> **If Customer Lifetime Value shows a very large number** (e.g., $39,000+): the formula is likely summing revenue *per customer row* instead of dividing. Make sure you're using `DIVIDE([Total Revenue], [Total Customers])` — both referencing the *measures*, not the raw columns.
 
-------
+---
 
-## Step 6: Create Customer Distribution Map
+## Step 5: Build the 4 KPI Cards
 
-1. Click blank area below KPI cards
-2. Select **Filled Map** (or **Map**) from Visualizations pane
-3. Add fields:
+Add a **Card** visual for each measure. Drag each card to the top of the canvas side-by-side.
+
+| Card # | Measure | Label to set | Format |
+|---|---|---|---|
+| 1 | `Total Customers` | "Total Customers" | Whole number |
+| 2 | `Customer Lifetime Value` | "Avg Lifetime Value" | Currency, 2 decimals |
+| 3 | `Countries Served` | "Countries Served" | Whole number |
+| 4 | `Avg Orders per Customer` | "Avg Orders / Customer" | Decimal, 1 place |
+
+**To align all 4 cards:** select all four (Ctrl+click each) → **Format** ribbon → **Align** → **Align Top**, then **Distribute Horizontally**.
+
+> **📋 Checkpoint — canvas top row**
+> The four cards should read (left to right): **59 · $39.47 · 24 · 7.0**
+>
+> The cards should be the same height and evenly spaced. Compare against the top row of `mockup.html`.
+>
+> **If the label doesn't update:** click the card → Format pane → **General** → **Title** → type the label text there, or use **Category label** → type in the Custom label field.
+
+---
+
+## Step 6: Customer Distribution Map
+
+1. Click a blank area of the canvas (below the KPI cards)
+2. Select **Filled Map** from the Visualizations pane (globe icon with filled regions)
+3. Drag fields:
    - `CUSTOMER[COUNTRY]` → **Location**
-   - `Total Customers` measure → **Color saturation** (Filled Map) or **Size** (Map)
+   - `Total Customers` measure → **Color saturation**
    - `Total Revenue` measure → **Tooltips**
-4. Resize to take up about 60% width of canvas
-5. **Format the map**:
-   - **Title**: "Customer Distribution by Country"
-   - **Data colors**:
-     - Choose a color gradient (e.g., light to dark blue)
-   - **Map settings**:
-     - Style: **Aerial** or **Road**
-   - **Zoom buttons**: Turn **On**
+4. Resize to take up about 55–60% of the canvas width
 
-> [!note]
+**Format settings to apply:**
+- Title: `Customer Distribution by Country`
+- Data colors: choose a gradient (recommend light-to-dark teal/green)
+- Map style: **Road** or **Grayscale** (avoids busy backgrounds)
+- Turn on **Zoom buttons**
+
+> **📋 Checkpoint — map visual**
+> The map should show colored regions across multiple continents. The **darkest** shading should appear over:
+> - **USA** (13 customers — highest)
+> - **Canada** (8 customers)
+> - **Brazil** and **France** (5 customers each)
 >
-> If you see a warning about geographic data, click "Yes, use as geographic" to enable geocoding.
+> Europe should have several moderately shaded countries. South America, India, and Australia should show lighter shading.
+>
+> **If the map shows a warning "Geocoding may not be accurate":** this is normal — click **OK** to proceed. Power BI geocodes country names automatically.
+>
+> **If all countries show the same shade:** make sure you dragged the `Total Customers` *measure* (not the `CUSTOMER_ID` column) to Color saturation.
 
-------
+---
 
-## Step 7: Create Customer Segmentation Treemap
+## Step 7: Customer Segmentation Treemap
 
-1. Click blank area (to the right of map)
-2. Select **Treemap** from Visualizations pane
-3. Add fields:
+1. Click a blank area to the right of the map
+2. Select **Treemap** from Visualizations
+3. Drag fields:
    - `CUSTOMER[COUNTRY]` → **Category**
    - `Total Revenue` measure → **Values**
-4. Position next to the map (remaining 40% width)
-5. **Format the treemap**:
-   - **Title**: "Customer Segmentation by Value"
-   - **Data labels**: Turn **On**
-   - **Category labels**: Turn **On**
-   - **Data colors**: Choose a color scale
+4. Resize to fill the remaining canvas width in that row
 
-> [!tip]
+**Format settings:**
+- Title: `Customer Segmentation by Value`
+- Data labels: **On**
+- Category labels: **On**
+
+> **📋 Checkpoint — treemap visual**
+> The largest rectangle should be labeled **USA** and represent roughly 22% of the total area.
+> The second largest should be **Canada**, followed by **France** and **Brazil** in similar sizes.
 >
-> Treemaps are great for showing hierarchical data. Each rectangle's size represents the revenue from that country.
+> Expected top boxes (approximate):
+> - USA: ~$523 → largest box
+> - Canada: ~$304 → second
+> - France: ~$195 and Brazil: ~$190 → similar medium boxes
+> - Germany, Czech Republic, UK → smaller boxes
+>
+> Compare proportions visually against the treemap in `mockup.html`.
+>
+> **If only one rectangle shows:** check that COUNTRY is in the **Category** field well, not Values. Values should only contain `Total Revenue`.
 
-------
+---
 
-## Step 8: Create Top 10 Customers Table
+## Step 8: Top 10 Customers Table
 
-1. Click blank area below the map and treemap
+1. Click a blank area below the map/treemap row
 2. Select **Table** visual
-3. Add fields (in this order):
-   - `CUSTOMER[Full Name]` → **Columns**
-   - `CUSTOMER[COUNTRY]` → **Columns**
-   - `Total Revenue` measure → **Columns**
-4. **Add Top N Filter**:
-   - Select the table
-   - In **Filters** pane, find `Full Name` under "Filters on this visual"
+3. Add columns in this order:
+   - `CUSTOMER[Full Name]` → Columns
+   - `CUSTOMER[COUNTRY]` → Columns
+   - `Total Revenue` measure → Columns
+4. **Apply a Top N filter:**
+   - In the **Filters** pane, find `Full Name` under "Filters on this visual"
    - Change filter type to **Top N**
-   - Set to show **Top 10**
-   - By value: drag `Total Revenue` measure
+   - Show: **Top 10** / By value: drag `Total Revenue`
    - Click **Apply filter**
-5. Resize to take up about 50% width of row
-6. **Format the table**:
-   - **Title**: "Top 10 Customers by Lifetime Value"
-   - **Style**: **Minimal**
-   - **Grid**:
-     - Horizontal dividers: **On**
-     - Vertical dividers: **Off**
-     - Row padding: **8**
-   - **Column headers**:
-     - Font size: **12**
-     - Bold: **On**
-   - **Values**:
-     - Total Revenue: Format as currency
+5. Sort by Total Revenue (descending) — click the column header
 
-------
+**Format:**
+- Title: `Top 10 Customers by Lifetime Value`
+- Style presets: **Minimal**
+- Format Total Revenue column as **Currency**
 
-## Step 9: Create Top Cities Table
+> **📋 Checkpoint — table content**
+> The table should show exactly 10 rows. The top 5 rows should look like:
+>
+> | # | Full Name | Country | Revenue |
+> |---|---|---|---|
+> | 1 | Helena Holy | Czech Republic | $49.62 |
+> | 2 | Richard Cunningham | USA | $47.62 |
+> | 3 | Luis Rojas | Chile | $46.42 |
+> | 4 | Hugh O'Reilly | Ireland | $45.62 |
+> | 5 | Julia Barnett | USA | $43.62 |
+>
+> **If the table shows more than 10 rows:** the Top N filter isn't applied. Go to Filters pane → make sure filter type is "Top N" (not "Basic filtering") and the "By value" field contains `Total Revenue`.
+>
+> **If the names are showing as separate First/Last columns:** you're dragging `FIRST_NAME` and `LAST_NAME` separately instead of the calculated `Full Name` column.
 
-1. Click blank area next to customers table
+---
+
+## Step 9: Top Cities Table
+
+1. Click a blank area to the right of the customers table
 2. Select **Table** visual
 3. Add fields:
-   - `CUSTOMER[CITY]` → **Columns**
-   - `Total Customers` measure → **Columns**
-   - `Total Revenue` measure → **Columns**
-4. **Add Top N Filter**:
-   - Filter `CITY` to **Top 10**
-   - By value: `Total Customers`
+   - `CUSTOMER[CITY]` → Columns
+   - `Total Customers` → Columns
+   - `Total Revenue` → Columns
+4. **Apply Top N filter** on `CITY`:
+   - Top N: **10** / By value: `Total Customers`
    - Apply filter
-5. Resize to remaining 50% width
-6. **Format the table**:
-   - **Title**: "Top Cities by Customer Count"
-   - Format similar to customers table
-   - Sort by Total Customers (descending)
+5. Sort by Total Customers (descending)
 
-------
+**Format:** Title: `Top Cities by Customer Count`, Minimal style
 
-## Step 10: Create Support Rep Performance Bar Chart
+> **📋 Checkpoint — table content**
+> Cities with 2 customers should appear first. The top rows should include cities like **Prague**, **Mountain View**, **São Paulo**, **London**, **Berlin**, and **Paris** (all with 2 customers). Cities with 1 customer fill the remaining rows.
+>
+> **If cities are missing or wrong:** check that the `CITY` column is from the `CUSTOMER` table (not INVOICE). The data is on the customer record, not the transaction.
 
-1. Click blank area below tables
-2. Select **Clustered Bar Chart** from Visualizations pane
+---
+
+## Step 10: Revenue by Support Rep — Bar Chart
+
+1. Click a blank area below the two tables
+2. Select **Clustered Bar Chart** (horizontal bars)
 3. Add fields:
    - `EMPLOYEE[Full Name]` → **Y-axis**
-   - `Total Revenue` measure → **X-axis**
-4. **Filter to support representatives only**:
-   - In **Filters** pane, find `EMPLOYEE[TITLE]`
-   - Select filter type: **Basic filtering**
-   - Check boxes for titles containing "Sales Support Agent" or similar
-   - Apply filter
-5. Resize to take up about 60% width
-6. **Format the chart**:
-   - **Title**: "Revenue by Support Representative"
-   - **Data labels**: Turn **On**
-   - **X-axis**:
-     - Title: "Total Revenue"
-     - Display units: **Thousands (K)**
-   - **Y-axis**:
-     - Title: Turn **Off**
-   - **Bars**:
-     - Choose a color
+   - `Total Revenue` → **X-axis**
+4. **Filter to Sales Support Agents only:**
+   - Filters pane → "Filters on this visual" → drag `EMPLOYEE[TITLE]`
+   - Change to **Basic filtering**
+   - Check the box for **"Sales Support Agent"**
+   - Click **Apply filter**
 
-> [!note]
+**Format:**
+- Title: `Revenue by Support Representative`
+- Data labels: **On**
+- X-axis display units: **None** (so full dollar amounts show)
+- Y-axis title: **Off**
+
+> **📋 Checkpoint — bar chart**
+> The chart should show exactly **3 bars** (one per Sales Support Agent), all horizontal:
 >
-> If you're not sure which titles to filter for, check the EMPLOYEE table in Table View to see the job titles.
+> ```
+> Jane Peacock    ████████████████████████████  $833
+> Margaret Park   ██████████████████████████    $775
+> Steve Johnson   █████████████████████████     $720
+> ```
+>
+> **If you see more than 3 employees:** the Title filter is not applied. In the Filters pane, make sure TITLE is filtered to "Sales Support Agent" only.
+>
+> **If bars are vertical instead of horizontal:** you selected "Clustered Column Chart" instead of "Clustered Bar Chart". Switch the visual type — same field mapping, different orientation.
+>
+> **If employee names don't appear:** check that you're using `EMPLOYEE[Full Name]` (the calculated column you created), not `EMPLOYEE[FIRST_NAME]`.
 
-------
+---
 
-## Step 11: Create Support Rep Performance Table
+## Step 11: Support Rep Performance Table
 
-1. Click blank area next to bar chart
+1. Click a blank area next to the bar chart
 2. Select **Table** visual
 3. Add fields:
-   - `EMPLOYEE[Full Name]` → **Columns**
-   - `Total Revenue` measure → **Columns**
-   - `Total Customers` measure → **Columns** (to show how many customers they support)
-4. **Apply same filter** as bar chart (support reps only)
-5. Resize to remaining 40% width
-6. **Format the table**:
-   - **Title**: "Support Rep Performance"
-   - **Style**: **Minimal**
-   - Sort by Total Revenue (descending)
-   - Format Total Revenue as currency
+   - `EMPLOYEE[Full Name]` → Columns
+   - `Total Revenue` → Columns
+   - `Total Customers` → Columns
+4. **Apply the same filter** as the bar chart (TITLE = "Sales Support Agent")
+5. Sort by Total Revenue (descending)
 
-------
+**Format:** Title: `Support Rep Performance`, format Total Revenue as Currency
 
-## Step 12: Optional - Create Customer Segmentation by Country/City
+> **📋 Checkpoint — table content**
+> The table should show 3 rows:
+>
+> | Employee Name | Total Revenue | Customers |
+> |---|---|---|
+> | Jane Peacock | $833.04 | 21 |
+> | Margaret Park | $775.40 | 20 |
+> | Steve Johnson | $720.16 | 18 |
+>
+> Total customers across all 3 reps (21 + 20 + 18 = 59) should match your `Total Customers` KPI card.
+>
+> **If Total Customers shows a different number in this table:** the EMPLOYEE → CUSTOMER relationship might be filtering in the wrong direction. Go to Model View → double-click the relationship line → check Cross filter direction.
 
-If you have extra space, add this bonus visual:
+---
 
-1. Click blank area
-2. Select **Stacked Column Chart**
-3. Add fields:
-   - `CUSTOMER[COUNTRY]` → **X-axis**
-   - `Total Customers` → **Y-axis**
-4. **Add drill-down capability**:
-   - Click the chart
-   - In the Fields well, add `CUSTOMER[CITY]` below COUNTRY
-   - This creates a hierarchy
-   - Click the drill-down arrow in the visual header
-5. Format as desired
+## Step 12: Final Formatting and Polish
 
-------
+### Add a report title
+- **Insert** tab → **Text Box**
+- Type: `Customer Analytics & Geographic Distribution`
+- Font size 20, Bold, centered
+- Place at the very top of the canvas (above the KPI cards)
 
-## Step 13: Final Formatting and Polish
+### Apply consistent colors
+- Select each visual → **Format** pane → **Data colors**
+- Use a consistent teal/green palette across all visuals (match the color you used for the KPI card top borders)
 
-1. **Add a report title**:
-   - **Insert** tab → **Text box**
-   - Type: "Customer Analytics & Geographic Distribution"
-   - Format: Font size **20**, Bold, Center align
-   - Position at very top of page
-2. **Apply consistent colors**:
-   - Use a color theme (green/teal to match customer focus)
-   - Select visuals → Format → Data colors → Choose theme
-3. **Add page background** (optional):
-   - Click blank area on canvas
-   - **Format** → **Canvas background**
-   - Color: Light gray (#F3F2F1) or light green (#F0F8F0)
-4. **Align all visuals**:
-   - Use Format → Align tools
-   - Ensure consistent spacing
-5. **Add borders to cards** (optional):
-   - Select KPI cards
-   - Format → General → Effects → Background → Turn **On**
-   - Add subtle shadow or border
-6. **Test interactions**:
-   - Click on a country in the map
-   - Verify all visuals filter properly
-   - Click on a support rep name
-   - See customers filter by that rep
+### Align visuals
+- Select multiple visuals (Ctrl+click) → **Format** ribbon → **Align**
+- Use **Align Left** and **Distribute Vertically** to clean up spacing
 
-------
+### Test cross-filtering
+Click on:
+- A **country in the map** → all other visuals should filter to show only that country's data
+- A **customer name** in the Top 10 table → the map should highlight that customer's country
+- A **support rep name** in the bar chart → the customer tables should filter to their customers
 
-## Step 14: Save Your Work
+> **📋 Final visual check — compare to mockup**
+> Open `mockup.html` and compare each section to your report:
+> - KPI cards: same 4 values in the same order
+> - Map: correct global spread of customer dots
+> - Treemap: USA clearly the largest, proportions look reasonable
+> - Tables: 10 rows each, sorted correctly
+> - Bar chart: 3 horizontal bars, Jane Peacock longest
+> - Support Rep table: 3 rows with correct revenue totals
 
-1. **File** → **Save As**
-2. Name: `Chinook_Customer_Dashboard.pbix`
-3. Click **Save**
+---
 
-------
+## Step 13: Save Your Work
 
-## Expected Results
+**File → Save As** → name it `Chinook_Customer_Dashboard.pbix`
 
-When complete, your dashboard should show:
+---
 
-- 4 KPI cards showing customer metrics
-- A filled map showing customer distribution by country
-- A treemap showing customer segmentation by revenue
-- A table of top 10 customers with their countries and lifetime value
-- A table of top 10 cities by customer count
-- A bar chart showing revenue by support representative
-- A table showing support rep performance metrics
+## Common Issues Quick-Reference
 
-**Total visuals**: 9 (4 cards + 5 charts/tables)
-
-------
-
-## Common Issues and Solutions
-
-### Issue: Employee Relationship Shows Wrong Cardinality
-
-**Solution**: The relationship between CUSTOMER[SUPPORT_REP_ID] and EMPLOYEE[EMPLOYEE_ID] should be Many-to-One (*:1). Check in Model View.
-
-### Issue: Customer Lifetime Value Shows Very Large Numbers
-
-**Solution**: Make sure you're dividing by Total Customers, not summing individual customer values. Use the DIVIDE function as shown in the DAX formula.
-
-### Issue: Map Shows Wrong Locations
-
-**Solution**: Some countries may have different names in your data (e.g., "USA" vs "United States"). Create a calculated column to standardize country names if needed.
-
-### Issue: Support Reps Don't Show in Visuals
-
-**Solution**: Check that SUPPORT_REP_ID in CUSTOMER table has values and matches EMPLOYEE_ID in EMPLOYEE table. NULL values won't show relationships.
-
-### Issue: Top 10 Filter Doesn't Work
-
-**Solution**: Make sure you're filtering by the correct field and using the measure in "By value" field. The filter should be on the dimension (Full Name), sorted by the measure (Total Revenue).
-
-------
-
-## Bonus Challenges
-
-If you finish early, try these enhancements:
-
-1. **Add a date slicer** to filter by invoice date range
-2. **Create a drill-through page** - right-click a customer name to see their individual purchase history
-3. **Add a scatter plot** showing customers by Total Revenue (X) vs Total Orders (Y)
-4. **Create customer segments** using DAX:
-   - High Value: >$45
-   - Medium Value: $40-45
-   - Low Value: <$40
-5. **Add conditional formatting** to the Top 10 Customers table - highlight top 3 in green
-6. **Create a new measure** for "Average Revenue per Order" by customer
-
-------
-
-## Advanced: Customer Cohort Analysis
-
-If you want to go deeper, create a cohort analysis:
-
-1. Create a calculated column for **First Purchase Month**:
-
-   ```DAX
-   First Purchase Month = 
-   CALCULATE(
-       MIN(INVOICE[INVOICE_DATE]),
-       ALLEXCEPT(CUSTOMER, CUSTOMER[CUSTOMER_ID])
-   )
-   ```
-
-2. Create a **Months Since First Purchase** calculated column in INVOICE:
-
-   ```DAX
-   Months Since First = 
-   DATEDIFF(
-       RELATED(CUSTOMER[First Purchase Month]),
-       INVOICE[INVOICE_DATE],
-       MONTH
-   )
-   ```
-
-3. Create a matrix visual showing cohort retention by month
-
-------
-
-## What You Learned
-
-✅ How to build customer-focused analytics dashboards ✅ Working with customer and employee tables ✅ Creating geographic visualizations with filled maps ✅ Using treemaps for hierarchical data ✅ Filtering visuals with Top N filters ✅ Analyzing sales representative performance ✅ Creating customer lifetime value calculations ✅ Building relationships between fact and dimension tables
-
-------
-
-## Comparing Dashboard 1 vs Dashboard 2
-
-| Aspect          | Dashboard 1                  | Dashboard 2                          |
-| --------------- | ---------------------------- | ------------------------------------ |
-| **Focus**       | Product/Sales Analysis       | Customer Analysis                    |
-| **Tables**      | 7 tables (product-centric)   | 4 tables (customer-centric)          |
-| **Key Metrics** | Revenue, tracks sold, genres | Customers, lifetime value, geography |
-| **Visuals**     | Line charts, donut charts    | Maps, treemaps, bar charts           |
-| **Use Case**    | What are we selling?         | Who is buying from us?               |
-
-Both dashboards work together to give a complete picture of the music store business!
-
-------
+| Problem | Most likely cause | Fix |
+|---|---|---|
+| Map shows blank / "no data" | COUNTRY column not recognized as geographic | Right-click COUNTRY column → Data category → Country |
+| Treemap shows one huge block | Values field has wrong column | Make sure COUNTRY is in Category, Total Revenue in Values |
+| Top N filter shows all rows | Filter type not changed | Filters pane → change from "Basic filtering" to "Top N" |
+| Support rep visuals show 9 employees | TITLE filter not applied | Add EMPLOYEE[TITLE] to Filters pane, select "Sales Support Agent" |
+| Customer Lifetime Value = $0 | INVOICE_LINE[Revenue] column missing | Create the Revenue calculated column in INVOICE_LINE first |
+| Cross-filtering doesn't work between tables | Missing relationship | Check Model View — all 3 relationship lines must exist |
+| Names show as blanks | Full Name column references wrong table | Re-create: `CUSTOMER[FIRST_NAME] & " " & CUSTOMER[LAST_NAME]` |
