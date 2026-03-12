@@ -23,14 +23,14 @@ You'll create a Date table using a single DAX formula. It will generate one row 
 2. In the formula bar, type:
 
 ```dax
-Date = CALENDARAUTO()
+DATE = CALENDARAUTO()
 ```
 
 3. Press **Enter**
 
-> **What `CALENDARAUTO()` does:** It scans every date column in your entire data model and automatically generates a continuous list of dates covering the full date range — from the earliest date found to the latest. For the Chinook data, this covers **2009 through 2013**.
+> **What `CALENDARAUTO()` does:** It scans every date column in your entire data model and automatically generates a continuous list of dates covering the full date range — from the earliest date found to the latest. For the Chinook data, this covers **2021 through 2025**.
 
-> **📋 Checkpoint:** Switch to **Table View** and select the `Date` table. You should see a single column named `Date` with one row per day from January 1, 2009 through December 31, 2013 — roughly 1,826 rows. If it shows a very short date range or only a few rows, check that INVOICE[INVOICE_DATE] is formatted as a Date column (not text).
+> **📋 Checkpoint:** Switch to **Table View** and select the `Date` table. You should see a single column named `Date` with one row per day from January 1, 2021 through December 31, 2025 — roughly 1,826 rows. If it shows a very short date range or only a few rows, check that INVOICE[INVOICE_DATE] is formatted as a Date column (not text).
 
 ---
 
@@ -110,7 +110,7 @@ Revenue Last Year = CALCULATE(
 )
 ```
 
-> **What this does:** Takes whatever date period is in the current filter context (e.g., "2013") and shifts it back exactly 12 months (to "2012"), then computes revenue for that shifted period.
+> **What this does:** Takes whatever date period is in the current filter context (e.g., "2025") and shifts it back exactly 12 months (to "2024"), then computes revenue for that shifted period.
 
 ---
 
@@ -155,7 +155,7 @@ Add a new report page to your Dashboard 1 file. Name it **"Revenue Trends"**.
    - Line 1 (Total Revenue): solid, primary color
    - Line 2 (Revenue YTD): dashed, secondary color
 
-> **📋 Checkpoint:** You should see two lines. The monthly revenue line goes up and down each month. The YTD line always goes up (it accumulates) and resets at the start of each new year (you'll see it dip back down at Jan 2010, Jan 2011, etc.).
+> **📋 Checkpoint:** You should see two lines. The monthly revenue line goes up and down each month. The YTD line always goes up (it accumulates) and resets at the start of each new year (you'll see it dip back down at Jan 2022, Jan 2023, etc.).
 
 ---
 
@@ -168,9 +168,9 @@ Add a new report page to your Dashboard 1 file. Name it **"Revenue Trends"**.
    - `Revenue Last Year` → **X-axis** (bar 2)
 3. Format:
    - Title: `Revenue: This Year vs. Last Year`
-   - Note: 2009 will show no "Last Year" bar (no 2008 data)
+   - Note: 2021 will show no "Last Year" bar (no 2020 data)
 
-> **📋 Checkpoint:** Each year from 2009–2013 should have two bars (except 2009 which has only one). The bars should be similar in length since Chinook's revenue was fairly stable year-to-year.
+> **📋 Checkpoint:** Each year from 2021–2025 should have two bars (except 2021 which has only one). The bars should be similar in length since Chinook's revenue was fairly stable year-to-year.
 
 ---
 
@@ -185,7 +185,7 @@ Add a new report page to your Dashboard 1 file. Name it **"Revenue Trends"**.
    - Format Y-axis as **Percentage**
    - Add a constant line at Y = 0 (Format → Analytics → Constant line → Value: 0)
 
-> **📋 Checkpoint:** 2009 should show blank/no bar (no prior year). 2010–2013 should show small positive or negative growth percentages. Chinook's data is relatively flat so growth rates will be small (single-digit %).
+> **📋 Checkpoint:** 2021 should show blank/no bar (no prior year). 2022–2025 should show small positive or negative growth percentages. Chinook's data is relatively flat so growth rates will be small (single-digit %).
 
 ---
 
@@ -195,7 +195,7 @@ Add a new report page to your Dashboard 1 file. Name it **"Revenue Trends"**.
 2. Drag `Date[Year]` → Field
 3. Format: **Dropdown** or **List** style
 
-> **Test interaction:** Select just **2011** in the slicer. All three charts should update to show only 2011 data. The YTD line should run from Jan 2011 to Dec 2011 and accumulate through that year only.
+> **Test interaction:** Select just **2023** in the slicer. All three charts should update to show only 2023 data. The YTD line should run from Jan 2023 to Dec 2023 and accumulate through that year only.
 
 ---
 
