@@ -145,7 +145,7 @@ In this activity, you'll build a complete sales dashboard using the Chinook data
 
 > [!note]
 >
-> Power BI should auto-detect most relationships. If a relationship already exists, you'll see the line connecting the tables.
+> Power BI should auto-detect most relationships. If a relation[‘ship already exists, you'll see the line connecting the tables.
 
 ------
 
